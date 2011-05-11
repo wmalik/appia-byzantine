@@ -1,0 +1,15 @@
+TODO:
+
+Implement stuff in this package: net.sf.appia.test.broadcast
+
+/*Algorithm 3.16*/
+AEB Layer
+Authentication Layer
+Byzantine Layer
+
+
+/*Algorithm 3.18*/
+ADEB Layer
+Authentication Layer
+Byzantine Layer
+

@@ -28,6 +28,7 @@ package net.sf.appia.test.broadcast;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import net.sf.appia.core.AppiaEventException;
@@ -51,15 +52,25 @@ import net.sf.appia.xml.utils.SessionProperties;
  * @version 1.0
  */
 public class AuthEchoBroadcastSession extends Session implements InitializableSession {
-	
+
+    
 	private Channel channel;
     private TimeProvider time;
-    
 	private InetSocketAddress local;
+	/*
 	private InetSocketAddress remote;
-	private int localPort = -1;
+	           private int localPort = -1;
     
-	private MyShell shell;
+     */
+	
+	/*Properties of AEB*/
+	private boolean sentecho;
+	private boolean delivered;
+	private ArrayList<String> echos;
+	private ArrayList<Integer> procs;
+	private String ipAddress;
+	private int localPort;
+	private ArrayList<InetSocketAddress> remotes; 
 	
     /**
      * Creates a new EccoSession.
@@ -81,12 +92,22 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
        * @param params The parameters given in the XML configuration.
        */
 	public void init(SessionProperties params) {
-		this.localPort = Integer.parseInt(params.getProperty("localport"));
-		final String remoteHost = params.getProperty("remotehost");
-		final int remotePort = Integer.parseInt(params.getProperty("remoteport"));
+	    ipAddress = new String(params.getProperty("ipaddr"));
+	    localPort = Integer.parseInt(params.getProperty("localport"));
+	    
+	    procs = new ArrayList<Integer>();
+	    procs.add(Integer.parseInt(params.getProperty("remoteport1")));
+	    procs.add(Integer.parseInt(params.getProperty("remoteport2")));
+	    procs.add(Integer.parseInt(params.getProperty("remoteport3")));
+
+	    System.out.println("procs.size"+procs.size());
+	    
 		try {
-			this.remote = 
-				new InetSocketAddress(InetAddress.getByName(remoteHost),remotePort);
+		    this.local = new InetSocketAddress(InetAddress.getByName(ipAddress),localPort);
+		    this.remotes = new ArrayList<InetSocketAddress>();
+			this.remotes.add( new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(0)));
+			this.remotes.add(  new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(1)));
+			this.remotes.add(  new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(2)));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -99,8 +120,8 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
      * @param remote the remote address
 	 */
 	public void init(int localPort, InetSocketAddress remote){
-        this.localPort = localPort;
-		this.remote = remote;
+        //this.localPort = localPort;
+		//this.remote = remote;
 	}
 
     /**
@@ -114,17 +135,90 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
 			handleChannelInit((ChannelInit) ev);
         else if (ev instanceof ChannelClose)
             handleChannelClose((ChannelClose) ev);
-		else if (ev instanceof MyEccoEvent)
-			handleMyEchoEvent((MyEccoEvent) ev);
-        else if (ev instanceof RegisterSocketEvent)
-            handleRSE((RegisterSocketEvent) ev);
-		else
-			try {
+        else if (ev instanceof BroadcastEvent)
+            handleBroadcastEvent((BroadcastEvent) ev);
+        else if (ev instanceof EchoEvent)
+            handleEchoEvent((EchoEvent) ev);
+        else if (ev instanceof SendEvent)
+            handleSendEvent((SendEvent) ev);
+        else
+            try {
 				ev.go();
 			} catch (AppiaEventException e) {
 				e.printStackTrace();
 			}
 	}
+
+    private void handleSendEvent(SendEvent ev) {
+        
+        System.out.println("handleSEND: "+ev.getBroadcastMessage());
+        //String senderID = String.valueOf(((InetSocketAddress)(ev.source)).getPort()).trim();
+
+        if( sentecho == false /*&& ev.getAebSender().equals(senderID)*/ ) {
+        sentecho = true;
+        for (int i=0; i < procs.size(); i++) {
+            
+            EchoEvent ee = new EchoEvent();
+            ee.setProcessID(String.valueOf(localPort));
+            ee.setBroadcastMessage(ev.getBroadcastMessage());
+            ee.source = local;
+            ee.dest = remotes.get(0);
+            
+            try {
+                ee.setSourceSession(this);
+                ee.init();
+                ee.go();
+            } catch (AppiaEventException e) {
+                e.printStackTrace();
+            }
+            
+        }
+        }
+       
+        
+    }
+
+    private void handleEchoEvent(EchoEvent ev) {
+        
+        System.out.println("handleECHO: "+ev.getBroadcastMessage());
+        
+    }
+
+    private void handleBroadcastEvent(BroadcastEvent ev) {
+   
+        System.out.println("procs.size"+procs.size());
+        
+           for (int i=0; i < procs.size(); i++) {
+                
+                SendEvent se = new SendEvent();
+                se.setProcessID(String.valueOf(localPort));
+                se.setBroadcastMessage(ev.getBroadcastMessage());
+                se.setAebSender(String.valueOf(localPort));
+                se.source = local;
+                se.dest = remotes.get(0);
+                se.setDir(Direction.DOWN);
+                
+                try {
+                    se.setSourceSession(this);
+                    se.setChannel(channel);
+                    se.init();
+                    se.go();
+                } catch (AppiaEventException e) {
+                    e.printStackTrace();
+                }
+                
+            }
+           
+           
+           /* Send to ourself?
+           SendEvent se = new SendEvent();
+           se.setProcessID(String.valueOf(localPort));
+           se.setBroadcastMessage(ev.getBroadcastMessage());
+           se.source = local;
+           se.dest = local;*/
+           
+        
+    }
 
     /*
      * ChannelInit
@@ -133,7 +227,14 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
         channel = init.getChannel();
         time = channel.getTimeProvider();
         try {
+            
+            /*Added for AEB*/
+            sentecho = false;
+            delivered = false;
+            echos = new ArrayList<String>();
+            
             init.go();
+            
         } catch (AppiaEventException e) {
             e.printStackTrace();
         }
@@ -142,58 +243,15 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
          * This event is used to register a socket on the layer that is used 
          * to interface Appia with sockets.
          */
-        try {
+        /*
+         * Commenting this for the time being - not required - as per Navaneeth
+         * try {
             new RegisterSocketEvent(channel,Direction.DOWN,this,localPort).go();
         } catch (AppiaEventException e1) {
             e1.printStackTrace();
-        }
+        }*/
     }
 
-    /*
-     * RegisterSocketEvent
-     */
-	private void handleRSE(RegisterSocketEvent event) {
-        if(event.error){
-            System.err.println("Error on the RegisterSocketEvent!!!");
-            System.exit(-1);
-        }
-        
-        local = new InetSocketAddress(event.localHost,event.port);
-        
-        shell = new MyShell(channel);
-        final Thread t = event.getChannel().getThreadFactory().newThread(shell);
-        t.setName("Ecco shell");
-        t.start();
-    }
-
-    /*
-     * EchoEvent
-     */
-	private void handleMyEchoEvent(MyEccoEvent echo) {
-		final Message message = echo.getMessage();
-        
-		if (echo.getDir() == Direction.DOWN) {
-            // Event is going DOWN
-			message.pushString(echo.getText());
-			
-			
-			echo.source = local;
-			echo.dest = remote;
-			try {
-				echo.setSourceSession(this);
-				echo.init();
-				echo.go();
-			} catch (AppiaEventException e) {
-				e.printStackTrace();
-			}
-		}
-		else {
-            // Event is going UP
-			echo.setText(message.popString()); //try commenting this line and see if this still works
-            final long now = time.currentTimeMillis();
-			System.out.print("\nOn ["+new Date(now)+"] : "+echo.getText()+"\n> ");
-		}
-	}
 
     /*
      * ChannelClose
@@ -201,6 +259,10 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
     private void handleChannelClose(ChannelClose close) {
         try {
             close.go();
+            /*Added for AEB*/
+            sentecho = false;
+            delivered = false;
+            echos = null;
         } catch (AppiaEventException e) {
             e.printStackTrace();
         }

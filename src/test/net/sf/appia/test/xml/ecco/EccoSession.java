@@ -87,6 +87,7 @@ public class EccoSession extends Session implements InitializableSession {
 		try {
 			this.remote = 
 				new InetSocketAddress(InetAddress.getByName(remoteHost),remotePort);
+			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -130,6 +131,7 @@ public class EccoSession extends Session implements InitializableSession {
      * ChannelInit
      */
     private void handleChannelInit(ChannelInit init) {
+        System.out.println("Channel init called");
         channel = init.getChannel();
         time = channel.getTimeProvider();
         try {
@@ -200,6 +202,7 @@ public class EccoSession extends Session implements InitializableSession {
      */
     private void handleChannelClose(ChannelClose close) {
         try {
+            System.out.println("Channel close called");
             close.go();
         } catch (AppiaEventException e) {
             e.printStackTrace();

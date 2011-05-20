@@ -59,15 +59,21 @@ public class AuthEchoBroadcastLayer extends Layer {
          */
 		
 		evProvide = new Class[] {
-          RegisterSocketEvent.class,      //so that application is bind to a socket
-          //usually this class is required for only the top most layer
+
+		        DeliverEvent.class,
+		        SendEvent.class,
+                EchoEvent.class,
+          
+          
         };
 		
 		evAccept = new Class[]{
                 ChannelInit.class,
                 ChannelClose.class,
-                RegisterSocketEvent.class,
-                MyEccoEvent.class,
+                BroadcastEvent.class,
+                SendEvent.class,
+                EchoEvent.class,
+    
         };
 	}
 	
@@ -76,6 +82,6 @@ public class AuthEchoBroadcastLayer extends Layer {
 	 * @see Layer#createSession()
 	 */
 	public Session createSession() {
-		return new AuthDoubleEchoBroadcastSession(this);
+		return new AuthEchoBroadcastSession(this);
 	}
 }

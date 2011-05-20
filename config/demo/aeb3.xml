@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appia PUBLIC "-//DTDName//DTD//EN"
+	"../xml/appiaxml.dtd">
+<appia>
+	<template name="ecco_t">
+		<session name="tcp_s" sharing="global">
+			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
+		</session>
+		<session name="aeb_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.AuthEchoBroadcastLayer</protocol>
+		</session>
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.ApplicationLayer</protocol>
+		</session>
+	</template>
+	<channel name="ecco_c" template="ecco_t" initialized="yes">
+		<chsession name="ecco_s">
+			<parameter name="localport">50003</parameter>
+			<parameter name="ipaddr">192.168.2.104</parameter>
+			<parameter name="remoteport1">50001</parameter>
+			<parameter name="remoteport2">50002</parameter>
+			<parameter name="remoteport3">50004</parameter>
+		</chsession>
+	</channel>
+</appia>

@@ -97,8 +97,8 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
 	    
 	    procs = new ArrayList<Integer>();
 	    procs.add(Integer.parseInt(params.getProperty("remoteport1")));
-	    procs.add(Integer.parseInt(params.getProperty("remoteport2")));
-	    procs.add(Integer.parseInt(params.getProperty("remoteport3")));
+	    //procs.add(Integer.parseInt(params.getProperty("remoteport2")));
+	    //procs.add(Integer.parseInt(params.getProperty("remoteport3")));
 
 	    System.out.println("procs.size"+procs.size());
 	    
@@ -106,8 +106,8 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
 		    this.local = new InetSocketAddress(InetAddress.getByName(ipAddress),localPort);
 		    this.remotes = new ArrayList<InetSocketAddress>();
 			this.remotes.add( new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(0)));
-			this.remotes.add(  new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(1)));
-			this.remotes.add(  new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(2)));
+			//this.remotes.add(  new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(1)));
+			//this.remotes.add(  new InetSocketAddress(InetAddress.getByName(ipAddress), procs.get(2)));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -162,7 +162,7 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
             ee.setProcessID(String.valueOf(localPort));
             ee.setBroadcastMessage(ev.getBroadcastMessage());
             ee.source = local;
-            ee.dest = remotes.get(0);
+            ee.dest = remotes.get(i);
             
             try {
                 ee.setSourceSession(this);
@@ -195,7 +195,7 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
                 se.setBroadcastMessage(ev.getBroadcastMessage());
                 se.setAebSender(String.valueOf(localPort));
                 se.source = local;
-                se.dest = remotes.get(0);
+                se.dest = remotes.get(i);
                 se.setDir(Direction.DOWN);
                 
                 try {

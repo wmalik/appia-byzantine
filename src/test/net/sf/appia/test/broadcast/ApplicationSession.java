@@ -198,6 +198,9 @@ public class ApplicationSession extends Session implements InitializableSession 
         final Thread t = event.getChannel().getThreadFactory().newThread(shell);
         t.setName("App shell");
         t.start();
+        
+        System.out.println("BLA BLA after shell");
+        
     }
 
  

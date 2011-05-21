@@ -14,12 +14,15 @@
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
-		<chsession name="ecco_s">
+		<chsession name="aeb_s">
 			<parameter name="localport">50002</parameter>
-			<parameter name="ipaddr">192.168.2.104</parameter>
+			<parameter name="ipaddr">192.168.1.81</parameter>
 			<parameter name="remoteport1">50001</parameter>
 			<parameter name="remoteport2">50003</parameter>
 			<parameter name="remoteport3">50004</parameter>
+		</chsession>
+			<chsession name="ecco_s">
+			<parameter name="localport">50002</parameter>
 		</chsession>
 	</channel>
 </appia>

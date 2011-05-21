@@ -14,7 +14,7 @@
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
 			<parameter name="localport">22222</parameter>
-			<parameter name="remotehost">192.168.20.104</parameter>
+			<parameter name="remotehost">192.168.1.81</parameter>
 			<parameter name="remoteport">33333</parameter>
 		</chsession>
 	</channel>

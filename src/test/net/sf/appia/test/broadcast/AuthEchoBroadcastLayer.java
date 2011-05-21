@@ -27,9 +27,12 @@ package net.sf.appia.test.broadcast;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
+import net.sf.appia.core.events.SendableEvent;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
+import net.sf.appia.protocols.tcpcomplete.CloseTcpSocket;
+import net.sf.appia.protocols.tcpcomplete.TcpTimer;
 
 
 /**
@@ -51,6 +54,7 @@ public class AuthEchoBroadcastLayer extends Layer {
 	     */
 		evRequire = new Class[]{
 		        ChannelInit.class,
+		        RegisterSocketEvent.class, SendableEvent.class,/*NEW*/
 		};
         
 		/* Comments by Wasif
@@ -59,7 +63,7 @@ public class AuthEchoBroadcastLayer extends Layer {
          */
 		
 		evProvide = new Class[] {
-
+		        RegisterSocketEvent.class,ChannelInit.class, SendableEvent.class, /*NEW*/
 		        DeliverEvent.class,
 		        SendEvent.class,
                 EchoEvent.class,
@@ -73,6 +77,8 @@ public class AuthEchoBroadcastLayer extends Layer {
                 BroadcastEvent.class,
                 SendEvent.class,
                 EchoEvent.class,
+                RegisterSocketEvent.class, TcpTimer.class,CloseTcpSocket.class, SendableEvent.class, /*NEW*/
+                
     
         };
 	}

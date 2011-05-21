@@ -6,12 +6,14 @@
 		<session name="tcp_s" sharing="global">
 			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
 		</session>
+		
 		<session name="aeb_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.AuthEchoBroadcastLayer</protocol>
 		</session>
-		<session name="ecco_s" sharing="private">
+		
+		<!-- <session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.ApplicationLayer</protocol>
-		</session>
+		</session> -->
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="aeb_s">
@@ -21,8 +23,8 @@
 			<parameter name="remoteport2">50003</parameter>
 			<parameter name="remoteport3">50004</parameter>
 		</chsession>
-			<chsession name="ecco_s">
+		<!-- 	<chsession name="ecco_s">
 			<parameter name="localport">50002</parameter>
-		</chsession>
+		</chsession> -->
 	</channel>
 </appia>

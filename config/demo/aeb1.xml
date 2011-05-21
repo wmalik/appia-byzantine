@@ -11,9 +11,9 @@
 			<protocol>net.sf.appia.test.broadcast.AuthEchoBroadcastLayer</protocol>
 		</session>
 		
-		<session name="ecco_s" sharing="private">
+		<!--  <session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.ApplicationLayer</protocol>
-		</session>
+		</session> -->
 	</template>
 	<channel name="ecco_ch" template="ecco_t" initialized="yes">
 		<chsession name="aeb_s">
@@ -24,9 +24,9 @@
 			<parameter name="remoteport3">50004</parameter>
 		</chsession>
 		
-			<chsession name="ecco_s">
+		<!-- <chsession name="ecco_s">
 			<parameter name="localport">50001</parameter>
-		</chsession>
+		</chsession> -->
 		
 	</channel>
 </appia>

@@ -51,6 +51,7 @@ public class EccoLayer extends Layer {
 	     */
 		evRequire = new Class[]{
 		        ChannelInit.class,
+		        RegisterSocketEvent.class,
 		};
         
 		/* Comments by Wasif

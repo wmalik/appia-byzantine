@@ -71,6 +71,8 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
 	private String ipAddress;
 	private int localPort;
 	private ArrayList<InetSocketAddress> remotes; 
+	private AppShell shell;
+	private int eventCount = 0;
 	
     /**
      * Creates a new EccoSession.
@@ -92,6 +94,10 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
        * @param params The parameters given in the XML configuration.
        */
 	public void init(SessionProperties params) {
+	    
+
+	    
+	    
 	    ipAddress = new String(params.getProperty("ipaddr"));
 	    localPort = Integer.parseInt(params.getProperty("localport"));
 	    
@@ -131,23 +137,58 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
      * @see net.sf.appia.core.Session#handle(net.sf.appia.core.Event)
      */
 	public void handle(Event ev) {
-		if (ev instanceof ChannelInit)
+        eventCount++;
+        
+	    if (ev instanceof ChannelInit)
+	    {
+
+	        show("("+eventCount+") ChannelInit");
 			handleChannelInit((ChannelInit) ev);
+			
+	    }
         else if (ev instanceof ChannelClose)
+        {
+        
+            show("("+eventCount+") ChannelClose");
             handleChannelClose((ChannelClose) ev);
+        }
+        else if (ev instanceof RegisterSocketEvent)
+        {
+        
+            show("("+eventCount+") RegisterSocketEvent");
+            handleRSE((RegisterSocketEvent) ev);
+        }
         else if (ev instanceof BroadcastEvent)
+        {
+        
+            show("("+eventCount+") BroadcastEvent");
             handleBroadcastEvent((BroadcastEvent) ev);
+        }
         else if (ev instanceof EchoEvent)
+        {
+        
+            show("("+eventCount+") EchoEvent");
             handleEchoEvent((EchoEvent) ev);
+        }
         else if (ev instanceof SendEvent)
+        {
+            
+            show("("+eventCount+") SendEvent");
             handleSendEvent((SendEvent) ev);
+        }
         else
             try {
+           
+                show("("+eventCount+") Event");
 				ev.go();
 			} catch (AppiaEventException e) {
 				e.printStackTrace();
 			}
 	}
+
+    private void show(String string) {
+        System.out.println(string);
+    }
 
     private void handleSendEvent(SendEvent ev) {
         
@@ -219,6 +260,29 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
            
         
     }
+    
+    
+    /*
+     * handle RSE event
+     * */
+    private void handleRSE(RegisterSocketEvent event) {
+        if(event.error){
+            System.err.println("Error on the RegisterSocketEvent!!!");
+            System.exit(-1);
+        }
+
+        System.out.println("Reminder: event.localHost not set by us.");
+        local = new InetSocketAddress(event.localHost,event.port);
+        
+        shell = new AppShell(channel, this);
+        final Thread t = event.getChannel().getThreadFactory().newThread(shell);
+        t.setName("App shell");
+        t.start();
+        
+        System.out.println("BLA BLA after shell");
+        
+    }
+
 
     /*
      * ChannelInit
@@ -228,7 +292,7 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
         time = channel.getTimeProvider();
         try {
             
-            /*Added for AEB*/
+            /*Added for AEB*/ //moved to init
             sentecho = false;
             delivered = false;
             echos = new ArrayList<String>();
@@ -243,13 +307,13 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
          * This event is used to register a socket on the layer that is used 
          * to interface Appia with sockets.
          */
-        /*
-         * Commenting this for the time being - not required - as per Navaneeth
-         * try {
+        
+         
+          try {
             new RegisterSocketEvent(channel,Direction.DOWN,this,localPort).go();
         } catch (AppiaEventException e1) {
             e1.printStackTrace();
-        }*/
+        }
     }
 
 

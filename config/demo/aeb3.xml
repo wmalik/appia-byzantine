@@ -9,9 +9,9 @@
 		<session name="aeb_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.AuthEchoBroadcastLayer</protocol>
 		</session>
-		<session name="ecco_s" sharing="private">
+		<!--<session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.ApplicationLayer</protocol>
-		</session>
+		</session> -->
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">

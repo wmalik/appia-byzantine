@@ -42,13 +42,15 @@ import net.sf.appia.core.Direction;
 public class AppShell implements Runnable {
 	
 	private Channel channel;
+	private AuthEchoBroadcastSession aeb;
 	
     /**
      * Creates a new MyShell.
      * @param ch
      */
-	public AppShell(Channel ch) {
+	public AppShell(Channel ch, AuthEchoBroadcastSession aeb) {
 		channel = ch;
+		this.aeb = aeb;
 	}
 	
     /**
@@ -69,13 +71,23 @@ public class AppShell implements Runnable {
 				e.printStackTrace();
 			}
 			
-			BroadcastEvent event = new BroadcastEvent();
-			event.setBroadcastMessage(str);
+			
+			
+			BroadcastEvent bEvent = new BroadcastEvent();
+			bEvent.setBroadcastMessage(str);
+			
+//			aeb.handle(bEvent);
+
+			
 			try {
-				event.asyncGo(channel,Direction.DOWN);
+				bEvent.asyncGo(channel,Direction.DOWN);
 			} catch (AppiaEventException e1) {
 				e1.printStackTrace();
 			}
+			
+			
+			
+			
 		}
 	}
 }

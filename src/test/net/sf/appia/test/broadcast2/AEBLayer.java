@@ -23,16 +23,13 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast;
+package net.sf.appia.test.broadcast2;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
-import net.sf.appia.core.events.SendableEvent;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.protocols.tcpcomplete.CloseTcpSocket;
-import net.sf.appia.protocols.tcpcomplete.TcpTimer;
 
 
 /**
@@ -41,12 +38,12 @@ import net.sf.appia.protocols.tcpcomplete.TcpTimer;
  * @author Jose Mocito
  * @version 1.0
  */
-public class AuthEchoBroadcastLayer extends Layer {
+public class AEBLayer extends Layer {
 
     /**
      * Creates a new EccoLayer.
      */
-	public AuthEchoBroadcastLayer() {
+	public AEBLayer() {
 		
 	    /* Comments by Wasif
 	     * specifies which guarantees/messages are required from the lower layers
@@ -54,7 +51,8 @@ public class AuthEchoBroadcastLayer extends Layer {
 	     */
 		evRequire = new Class[]{
 		        ChannelInit.class,
-		        RegisterSocketEvent.class, SendableEvent.class,/*NEW*/
+		        RegisterSocketEvent.class,
+		        SendEvent.class,
 		};
         
 		/* Comments by Wasif
@@ -63,23 +61,19 @@ public class AuthEchoBroadcastLayer extends Layer {
          */
 		
 		evProvide = new Class[] {
-		        RegisterSocketEvent.class,ChannelInit.class, SendableEvent.class, BroadcastEvent.class, /*NEW*/
-		        DeliverEvent.class,
-		        SendEvent.class,
-                EchoEvent.class,
-          
-          
+          RegisterSocketEvent.class, 
+          SendEvent.class,
+          EchoEvent.class,//so that application is bind to a socket
+          //usually this class is required for only the top most layer
         };
 		
 		evAccept = new Class[]{
                 ChannelInit.class,
                 ChannelClose.class,
+                RegisterSocketEvent.class,
                 BroadcastEvent.class,
                 SendEvent.class,
                 EchoEvent.class,
-                RegisterSocketEvent.class, TcpTimer.class,CloseTcpSocket.class, SendableEvent.class, /*NEW*/
-                
-    
         };
 	}
 	
@@ -88,6 +82,6 @@ public class AuthEchoBroadcastLayer extends Layer {
 	 * @see Layer#createSession()
 	 */
 	public Session createSession() {
-		return new AuthEchoBroadcastSession(this);
+		return new AEBSession(this);
 	}
 }

@@ -229,6 +229,25 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
    
         System.out.println("procs.size"+procs.size());
         
+      if(ev.getDir() == Direction.DOWN)
+      {
+          show("Broadcast event going down");
+        ev.source = local;
+        ev.dest = remotes.get(0);
+        try {
+            ev.setSourceSession(this);
+            ev.init();
+            ev.go();
+        } catch (AppiaEventException e) {
+            e.printStackTrace();
+        }
+      }
+      
+      else {
+          show("Broadcast event going up");
+      }
+        
+        /*
            for (int i=0; i < procs.size(); i++) {
                 
                 SendEvent se = new SendEvent();
@@ -238,6 +257,8 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
                 se.source = local;
                 se.dest = remotes.get(i);
                 se.setDir(Direction.DOWN);
+                se.getMessage().pushString("Wasif ROCKS!");
+                
                 
                 try {
                     se.setSourceSession(this);
@@ -248,7 +269,7 @@ public class AuthEchoBroadcastSession extends Session implements InitializableSe
                     e.printStackTrace();
                 }
                 
-            }
+            }*/
            
            
            /* Send to ourself?

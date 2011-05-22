@@ -6,17 +6,16 @@
 		<session name="tcp_s" sharing="global">
 			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
 		</session>
-		
 		<session name="ecco_s" sharing="private">
-			<protocol>net.sf.appia.test.broadcast2.AEBLayer</protocol>
+			<protocol>net.sf.appia.test.ADEB.ADEBLayer</protocol>
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
-			<parameter name="rank">0</parameter>
-			<parameter name="localport">22222</parameter>
+		<parameter name="rank">1</parameter>
+			<parameter name="localport">33333</parameter>
 			<parameter name="remotehost">192.168.1.81</parameter>
-			<parameter name="remoteport1">33333</parameter>
+			<parameter name="remoteport1">22222</parameter>
 			<parameter name="remoteport2">44444</parameter>
 			<parameter name="remoteport3">55555</parameter>
 		</chsession>

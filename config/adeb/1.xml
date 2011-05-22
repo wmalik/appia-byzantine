@@ -8,7 +8,7 @@
 		</session>
 		
 		<session name="ecco_s" sharing="private">
-			<protocol>net.sf.appia.test.broadcast2.AEBLayer</protocol>
+			<protocol>net.sf.appia.test.ADEB.ADEBLayer</protocol>
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">

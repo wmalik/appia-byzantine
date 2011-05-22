@@ -23,7 +23,7 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast2;
+package net.sf.appia.test.ADEB;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -52,7 +52,7 @@ import net.sf.appia.xml.utils.SessionProperties;
  * @author Jose Mocito
  * @version 1.0
  */
-public class AEBSession extends Session implements InitializableSession {
+public class ADEBSession extends Session implements InitializableSession {
 
     private Channel channel;
     private TimeProvider time;
@@ -60,17 +60,19 @@ public class AEBSession extends Session implements InitializableSession {
     private InetSocketAddress local;
     private int localPort = -1;
     private ArrayList<InetSocketAddress> processes; 
-
+    private String remoteHost;
     private MyShell shell;
 
 
-private String remoteHost;
 
     private boolean sentecho;
+    private boolean sentready;
     private boolean delivered;
-
-    private int rank;
     private ArrayList<String> echos;
+    private ArrayList<String> readys;
+    
+    private int rank;
+    
     private final static String BOTTOM = "BOTTOM";
     private int N;
     private final static int f = 1;
@@ -81,7 +83,7 @@ private String remoteHost;
      * Creates a new EccoSession.
      * @param l
      */
-    public AEBSession(AEBLayer l) {
+    public ADEBSession(ADEBLayer l) {
         super(l);
     }
 
@@ -131,6 +133,12 @@ private String remoteHost;
             echos = new ArrayList<String>(N);
             for(int i=0;i<this.processes.size()+1;i++)
                 echos.add(BOTTOM);
+            
+            readys = new ArrayList<String>(N);
+            for(int i=0;i<this.processes.size()+1;i++)
+                readys.add(BOTTOM);
+
+            
 
         } catch (UnknownHostException e) {
             e.printStackTrace(); //
@@ -167,6 +175,8 @@ private String remoteHost;
             handleSendEvent((SendEvent) ev);
         else if (ev instanceof EchoEvent)
             handleEchoEvent((EchoEvent) ev);
+        else if (ev instanceof ReadyEvent)
+            handleReadyEvent((ReadyEvent) ev);
         else
             try {
                 ev.go();
@@ -175,56 +185,152 @@ private String remoteHost;
             }
     }
 
-    private void handleEchoEvent(EchoEvent ev) {
+    private void handleReadyEvent(ReadyEvent ev) {
+        
+        
         if (ev.getDir() == Direction.UP){
 
-            /*        //Testing purpose, Remove later
-        Message message = ev.getMessage();
-
-        int sender_rank = message.popInt();
-        String recvd_msg = message.popString();
-
-        ev.setBroadcastMessage(recvd_msg);
-        final long now = time.currentTimeMillis();
-        System.out.print("\n[ECHO EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+" from Process:"+sender_rank+"\n> ");
-        /////////////////////////////////////////    
-             *         
-             */
-
-            /*my code starts here - REMOVE this comment after successful testing*/
 
             Message message = ev.getMessage();
 
-            int rank = message.popInt();
+            int msg_rank = message.popInt();
+            String recvd_msg = message.popString();
+            
+            //do stuff here
+            System.out.println("[READY_RECEIVED] Source:"+msg_rank + 
+                                " MESSAGE: "+ recvd_msg);
+
+
+            if(readys.get(msg_rank).equals(BOTTOM))
+            {
+                readys.set(msg_rank, recvd_msg);
+                System.out.println("Ready collected from process_"+msg_rank + ": "+recvd_msg);
+            }
+
+            String msg = checkMajority_f(readys);
+            if(msg!=null && sentready == false) {
+                sentready = true;
+                broadcastReady(msg, "[READY2]");
+            }
+            
+            
+            String msg2 = checkMajority_2f(readys);
+            if(msg!=null && delivered == false) {
+                delivered = true;
+                Deliver(msg2, this.sender_rank);
+
+            }
+
+
+        }
+        
+        
+    }
+
+    private String checkMajority_f(ArrayList<String> readys) {
+
+        int msgCount = 0;
+        for(int i=0;i<readys.size();i++) {
+            String current = readys.get(i);
+            if (current == BOTTOM) {
+                continue;
+            }
+            else {
+                for(int j=0;j<readys.size();j++) {
+                    if (current.equals(readys.get(j))) {
+                        msgCount++;
+                    }
+                }
+                if (msgCount > f) {
+                    return current; //this is the message
+                }
+            }
+        }
+        
+        return null; //means msgCount is not greater than f
+    }
+
+    
+    private String checkMajority_2f(ArrayList<String> readys) {
+
+        int msgCount = 0;
+        for(int i=0;i<readys.size();i++) {
+            String current = readys.get(i);
+            if (current == BOTTOM) {
+                continue;
+            }
+            else {
+                for(int j=0;j<readys.size();j++) {
+                    if (current.equals(readys.get(j))) {
+                        msgCount++;
+                    }
+                }
+                if (msgCount > (2*f)) {
+                    return current; //this is the message
+                }
+            }
+        }
+        
+        return null; //means msgCount is not greater than f
+    }
+    
+    private void handleEchoEvent(EchoEvent ev) {
+        if (ev.getDir() == Direction.UP){
+
+
+            Message message = ev.getMessage();
+
+            int msg_rank = message.popInt();
             String recvd_msg = message.popString();
 
 
-            if(echos.get(rank).equals(BOTTOM))
+            if(echos.get(msg_rank).equals(BOTTOM))
             {
-                echos.set(rank, recvd_msg);
-                System.out.println("Echo collected from process_"+rank + ": "+recvd_msg);
+                echos.set(msg_rank, recvd_msg);
+                System.out.println("Echo collected from process_"+msg_rank + ": "+recvd_msg);
             }
 
             String msg = checkMajority(echos);
 
-            if(msg!=null && delivered == false) {
-                delivered = true;
-                Deliver(msg, sender_rank);
-
+            if(msg!=null && sentready == false) {
+                sentready = true;
+                broadcastReady(msg, "[READY]");
             }
 
-
-            /*my code ends here*/
-
         }
-
 
     }
 
 
-    private void Deliver(String msg, int sender_rank) {
+    private void broadcastReady(String recvd_msg, String debug_msg) {
+        for(int i=0;i < processes.size(); i++) {
 
-        System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ sender_rank);
+            ReadyEvent re = new ReadyEvent();
+            re.getMessage().pushString(recvd_msg);
+            re.getMessage().pushInt(this.rank);
+            
+            re.setDir(Direction.DOWN);
+            re.setSourceSession(this);
+            re.setChannel(channel);
+            re.source = local;
+            re.dest = processes.get(i);
+
+            try {
+                
+                re.init();
+                re.go();
+                System.out.println(debug_msg + " Sent to process_"+i);
+                
+            } catch (AppiaEventException e) {
+                e.printStackTrace();
+            }            
+
+        }
+    }
+
+    private void Deliver(String msg, int s_rank) {
+
+        System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ s_rank);
         /*
         try {
 
@@ -302,7 +408,7 @@ private String remoteHost;
     private void handleSendEvent(SendEvent ev) {
         if (ev.getDir() == Direction.UP && sentecho == false){  // REmember to check if p=s(actually authentication layer should do this)
             sentecho = true;
-            sender_rank = ev.getMessage().popInt();
+            this.sender_rank = ev.getMessage().popInt();
            // ev.getMessage().pushInt(sender_rank);
 
             for(int i=0;i < processes.size(); i++) {
@@ -408,7 +514,7 @@ private String remoteHost;
         if (ev.getDir() == Direction.DOWN) {
             // Event is going DOWN
 
-            //send to ourself asdasd
+            //send to ourself
             /*
             SendEvent se_self = new SendEvent();
             final Message messageSend_self = se_self.getMessage();
@@ -433,11 +539,11 @@ private String remoteHost;
                 SendEvent se = new SendEvent();
                 final Message messageSend = se.getMessage();
                 messageSend.pushString(ev.getText());
-                messageSend.pushInt(rank);
+                messageSend.pushInt(this.rank); //pushing the initiators rank
                 se.source = local;
                 se.dest = processes.get(i);
                 try {
-                    System.out.println("Sending to process_"+i);
+                    System.out.println("Sending to process_"+i); //asldkj
                     se.setSourceSession(this);
                     se.setChannel(channel);
                     se.setDir(Direction.DOWN);

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appia PUBLIC "-//DTDName//DTD//EN"
+	"../xml/appiaxml.dtd">
+<appia>
+	<template name="ecco_t">
+		<session name="tcp_s" sharing="global">
+			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
+		</session>
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast2Byzantine.ByzantineLayer</protocol>
+		</session>
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast2Byzantine.AEBLayer</protocol>
+		</session>
+	</template>
+	<channel name="ecco_c" template="ecco_t" initialized="yes">
+		<chsession name="ecco_s">
+		<parameter name="rank">2</parameter>
+			<parameter name="localport">44444</parameter>
+			<parameter name="remotehost">127.0.0.1</parameter>
+			<parameter name="remoteport1">22222</parameter>
+			<parameter name="remoteport2">33333</parameter>
+			<parameter name="remoteport3">55555</parameter>
+			<parameter name="drop_send">false</parameter>
+			<parameter name="drop_echo"></parameter>
+			<parameter name="modify_messageAtSource">0</parameter>
+			<parameter name="modify_messageInBetween">0</parameter>
+		</chsession>
+	</channel>
+</appia>

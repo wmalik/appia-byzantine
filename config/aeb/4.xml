@@ -14,7 +14,7 @@
 		<chsession name="ecco_s">
 		<parameter name="rank">3</parameter>
 			<parameter name="localport">55555</parameter>
-			<parameter name="remotehost">192.168.1.81</parameter>
+			<parameter name="remotehost">192.168.1.78</parameter>
 			<parameter name="remoteport1">22222</parameter>
 			<parameter name="remoteport2">33333</parameter>
 			<parameter name="remoteport3">44444</parameter>

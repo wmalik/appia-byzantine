@@ -8,4 +8,4 @@ done
 echo "Classpath: $CP";
 
 
-java -cp $CP net.sf.appia.test.broadcast2.Ecco $@
+java -cp $CP net.sf.appia.test.broadcast2.AEB $@

@@ -64,6 +64,7 @@ public class AEBSession extends Session implements InitializableSession {
     private MyShell shell;
 
 
+private String remoteHost;
 
     private boolean sentecho;
     private boolean delivered;
@@ -108,7 +109,7 @@ public class AEBSession extends Session implements InitializableSession {
 
         this.rank = Integer.parseInt(params.getProperty("rank"));
         this.localPort = Integer.parseInt(params.getProperty("localport"));
-        final String remoteHost = params.getProperty("remotehost");
+        remoteHost = params.getProperty("remotehost");
         final int remotePort1 = Integer.parseInt(params.getProperty("remoteport1"));
         final int remotePort2 = Integer.parseInt(params.getProperty("remoteport2"));
         final int remotePort3 = Integer.parseInt(params.getProperty("remoteport3"));
@@ -194,14 +195,14 @@ public class AEBSession extends Session implements InitializableSession {
 
             Message message = ev.getMessage();
 
-            int sender_rank = message.popInt();
+            int rank = message.popInt();
             String recvd_msg = message.popString();
 
 
-            if(echos.get(sender_rank).equals(BOTTOM))
+            if(echos.get(rank).equals(BOTTOM))
             {
-                echos.set(sender_rank, recvd_msg);
-                System.out.println("Echo collected from process_"+sender_rank + ": "+recvd_msg);
+                echos.set(rank, recvd_msg);
+                System.out.println("Echo collected from process_"+rank + ": "+recvd_msg);
             }
 
             String msg = checkMajority(echos);
@@ -367,7 +368,14 @@ public class AEBSession extends Session implements InitializableSession {
          * to interface Appia with sockets.
          */
         try {
-            new RegisterSocketEvent(channel,Direction.DOWN,this,localPort).go();
+            RegisterSocketEvent rse = new RegisterSocketEvent(channel,Direction.DOWN,this,localPort);
+            try {
+                rse.localHost = InetAddress.getByName(remoteHost);
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            rse.go();
         } catch (AppiaEventException e1) {
             e1.printStackTrace();
         }

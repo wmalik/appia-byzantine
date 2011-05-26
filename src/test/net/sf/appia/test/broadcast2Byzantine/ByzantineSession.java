@@ -69,6 +69,7 @@ public class ByzantineSession extends Session implements InitializableSession {
     private boolean drop_echo = false;
     private Integer modify_messageAtSource;
     private Integer modify_messageInBetween;
+    private boolean go = true;
 
 
     /**
@@ -139,17 +140,25 @@ public class ByzantineSession extends Session implements InitializableSession {
 
     private void handleEchoEvent(EchoEvent ev) {
         
-        if(modify_messageInBetween >0){
+        if(modify_messageInBetween >0 && ev.getDir() == Direction.DOWN){
+            Integer rank = ev.getMessage().popInt();
             String msg = ev.getMessage().popString();
             Random r = new Random();
             msg = Long.toString(Math.abs(r.nextLong()), 36);
+            System.out.println("Modified String is: " +msg);
             ev.setBroadcastMessage(msg);
             ev.getMessage().pushString(msg);
+            ev.getMessage().pushInt(rank);
             modify_messageInBetween --;
         }
         
-        if(!this.drop_echo)
+        if(this.drop_echo && ev.getDir() == Direction.DOWN)
         {
+            System.out.println("[BYZANTINE] Dropping message of type Echoevent");
+            this.go = false;
+        }
+        
+        if(this.go) {
             try {
                 ev.go();
             } catch (AppiaEventException e) {
@@ -157,15 +166,13 @@ public class ByzantineSession extends Session implements InitializableSession {
                 e.printStackTrace();
             }
         }
-        
-        else {
-            System.out.println("[BYZANTINE] Dropping message of type Echoevent");
-        }
+        this.go = true;
+    
     }
 
     private void handleSendEvent(SendEvent ev) {
         
-        if(modify_messageAtSource>0){
+        if(modify_messageAtSource>0 && ev.getDir() == Direction.DOWN){
             Integer rank = ev.getMessage().popInt();
             String msg = ev.getMessage().popString();
             Random r = new Random();
@@ -177,17 +184,19 @@ public class ByzantineSession extends Session implements InitializableSession {
             modify_messageAtSource --;
         }
         
-        if(!this.drop_send){
+        if(this.drop_send && ev.getDir() == Direction.DOWN){
+            System.out.println("[BYZANTINE] Dropping message of type sendevent");
+            this.go = false;
+        }
+        if(this.go){
             try {
                 ev.go();
             } catch (AppiaEventException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
+            }   
         }
-        else{
-            System.out.println("[BYZANTINE] Dropping message of type sendevent");   
-        }
+        this.go = true;
     }
 
 }

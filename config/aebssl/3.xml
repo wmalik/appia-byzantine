@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appia PUBLIC "-//DTDName//DTD//EN"
+	"../xml/appiaxml.dtd">
+<appia>
+	<template name="ecco_t">
+		<session name="tcp_s" sharing="global">
+		<!-- <protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol> -->
+			
+			 <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol> 
+		</session>
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.ssl.AEBLayer</protocol>
+		</session>
+	</template>
+	<channel name="ecco_c" template="ecco_t" initialized="yes">
+		<chsession name="ecco_s">
+			<parameter name="rank">2</parameter>
+
+			<parameter name="processfile">config/aebssl/processes.txt</parameter>
+
+			<parameter name="ssl">false</parameter>
+			<parameter name="user_alias">user1</parameter>
+			<parameter name="keystore_file">config/aebssl/user3.jks</parameter>
+			<parameter name="passphrase">wasnav</parameter>
+
+		</chsession>
+
+		<chsession name="tcp_s">
+		
+			<parameter name="user_alias">user1</parameter>
+			<parameter name="keystore_file">config/aebssl/user3.jks</parameter>
+			<parameter name="passphrase">wasnav</parameter>
+		</chsession>
+	</channel>
+</appia>

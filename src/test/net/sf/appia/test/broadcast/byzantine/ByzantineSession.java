@@ -126,11 +126,11 @@ public class ByzantineSession extends Session implements InitializableSession {
      */
     public void handle(Event ev) {
         if (ev instanceof SendEvent){
-            System.out.println("BYZANTINE LAYER: SEND EVENT");
+            //System.out.println("BYZANTINE LAYER: SEND EVENT");
             handleSendEvent((SendEvent) ev);
         }
         else if (ev instanceof EchoEvent){
-            System.out.println("BYZANTINE LAYER: ECHO EVENT");
+            //System.out.println("BYZANTINE LAYER: ECHO EVENT");
             handleEchoEvent((EchoEvent) ev);
         }
         else{
@@ -147,6 +147,7 @@ public class ByzantineSession extends Session implements InitializableSession {
     private void handleEchoEvent(EchoEvent ev) {
         if (ev.getDir() == Direction.DOWN && ev.dest instanceof AppiaMulticast){
             Object[] dests = ((AppiaMulticast)ev.dest).getDestinations();
+            int sender_rank = ev.getMessage().popInt();
             int rank_recvd =ev.getMessage().popInt();
             String msg_recvd = ev.getMessage().popString();
             for( int i =0; i< dests.length; i++  ){
@@ -155,10 +156,11 @@ public class ByzantineSession extends Session implements InitializableSession {
                 final Message messageSend = ee.getMessage();
                 messageSend.pushString(msg_recvd);
                 messageSend.pushInt(rank_recvd);
+                messageSend.pushInt(sender_rank);
                 ee.source = local;
                 ee.dest = (InetSocketAddress) dests[i];
                 try {
-                    System.out.println("Sending to process_"+i);
+                  //  System.out.println("Sending to process_"+i);
                     ee.setSourceSession(ev.getSourceSession());
                     ee.setChannel(ev.getChannel());
                     ee.setDir(Direction.DOWN);
@@ -169,6 +171,7 @@ public class ByzantineSession extends Session implements InitializableSession {
 
 
                 if(modify_messageInBetween >0 && ev.getDir() == Direction.DOWN){
+                    Integer sender = ee.getMessage().popInt();
                     Integer rank = ee.getMessage().popInt();
                     String msg = ee.getMessage().popString();
                     Random r = new Random();
@@ -177,6 +180,7 @@ public class ByzantineSession extends Session implements InitializableSession {
                     ee.setBroadcastMessage(msg);
                     ee.getMessage().pushString(msg);
                     ee.getMessage().pushInt(rank);
+                    ee.getMessage().pushInt(sender);
                     modify_messageInBetween --;
                 }
 

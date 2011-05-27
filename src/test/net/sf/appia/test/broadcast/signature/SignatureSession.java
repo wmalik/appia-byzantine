@@ -179,7 +179,7 @@ public class SignatureSession extends Session implements InitializableSession{
         
     		SendableEvent evt = (SendableEvent) e;
     		Message message = evt.getMessage();
-    		System.out.println("SIGNATURE LAYER: "+myAlias);
+    		//System.out.println("SIGNATURE LAYER: "+myAlias);
     		
     		if(e.getDir() == Direction.DOWN){
     			message.pushString(myAlias);

@@ -23,16 +23,16 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast.byzantine;
+package net.sf.appia.test.broadcast.adeb;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.test.broadcast.aeb.BroadcastEvent;
-import net.sf.appia.test.broadcast.aeb.EchoEvent;
-import net.sf.appia.test.broadcast.aeb.SendEvent;
+import net.sf.appia.test.broadcast.adeb.BroadcastEvent;
+import net.sf.appia.test.broadcast.adeb.EchoEvent;
+import net.sf.appia.test.broadcast.adeb.SendEvent;
 
 
 /**
@@ -41,20 +41,19 @@ import net.sf.appia.test.broadcast.aeb.SendEvent;
  * @author Jose Mocito
  * @version 1.0
  */
-public class ByzantineLayer extends Layer {
+public class ApplicationLayer extends Layer {
 
     /**
      * Creates a new EccoLayer.
      */
-	public ByzantineLayer() {
+	public ApplicationLayer() {
 		
 	    /* Comments by Wasif
 	     * specifies which guarantees/messages are required from the lower layers
 	     * 
 	     */
 		evRequire = new Class[]{
-		        ChannelInit.class,
-		        RegisterSocketEvent.class,
+		      
 		};
         
 		/* Comments by Wasif
@@ -63,19 +62,11 @@ public class ByzantineLayer extends Layer {
          */
 		
 		evProvide = new Class[] {
-          RegisterSocketEvent.class, 
-          SendEvent.class,
-          EchoEvent.class,//so that application is bind to a socket
-          //usually this class is required for only the top most layer
+          
         };
 		
 		evAccept = new Class[]{
-                ChannelInit.class,
-                ChannelClose.class,
-                RegisterSocketEvent.class,
-                BroadcastEvent.class,
-                SendEvent.class,
-                EchoEvent.class,
+           DeliverEvent.class,
         };
 	}
 	
@@ -84,6 +75,6 @@ public class ByzantineLayer extends Layer {
 	 * @see Layer#createSession()
 	 */
 	public Session createSession() {
-		return new ByzantineSession(this);
+		return new ApplicationSession(this);
 	}
 }

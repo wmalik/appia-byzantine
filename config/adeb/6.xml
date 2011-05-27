@@ -21,6 +21,11 @@
 		<session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.adeb.ADEBLayer</protocol>
 		</session>
+		
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.adeb.ApplicationLayer</protocol>
+		</session>
+		
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">

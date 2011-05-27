@@ -139,7 +139,7 @@ public class AEBSession extends Session implements InitializableSession {
             this.processfile = params.getProperty("processfile");
             this.processSet = ProcessSet.buildProcessSet(processfile,rank);
             
-            N = this.processSet.getSize() + 1;
+            N = this.processSet.getSize();
 
             echos = new ArrayList<String>(N);
             for(int i=0;i<N;i++)
@@ -284,7 +284,7 @@ public class AEBSession extends Session implements InitializableSession {
                 for(int j=0;j<correctEchos.size();j++) {
                     String msg2 = correctEchos.get(j);
                     if(!msg1.equals(msg2)) {
-                        System.out.println("ECHOS not same - BYZANTINE DETECTED");
+                      //  System.out.println("ECHOS not same - BYZANTINE DETECTED");
                     }
                     else {
                         correctCount++;

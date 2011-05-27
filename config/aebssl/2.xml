@@ -8,6 +8,11 @@
 			
 			 <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol> 
 		</session>
+		
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.ssl.ByzantineLayer</protocol>
+		</session>
+		
 		<session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.broadcast.ssl.AEBLayer</protocol>
 		</session>
@@ -18,6 +23,10 @@
 			
 			
 			<parameter name="processfile">config/aebssl/processes.txt</parameter>
+			<parameter name="drop_send">false</parameter>
+			<parameter name="drop_echo">false</parameter>
+			<parameter name="modify_messageAtSource">0</parameter>
+			<parameter name="modify_messageInBetween">0</parameter>
 			
 			<parameter name="ssl">false</parameter>
 			<parameter name="user_alias">user1</parameter>

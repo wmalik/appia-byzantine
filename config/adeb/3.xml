@@ -4,20 +4,33 @@
 <appia>
 	<template name="ecco_t">
 		<session name="tcp_s" sharing="global">
-			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
+		 <protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol> 
+		<!--	
+			 <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
+			 --> 
 		</session>
-		<session name="ecco_s" sharing="private">
+				<session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.ADEB.ADEBLayer</protocol>
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
-		<parameter name="rank">2</parameter>
-			<parameter name="localport">44444</parameter>
-			<parameter name="remotehost">192.168.1.81</parameter>
-			<parameter name="remoteport1">22222</parameter>
-			<parameter name="remoteport2">33333</parameter>
-			<parameter name="remoteport3">55555</parameter>
+			<parameter name="rank">2</parameter>
+			
+			<parameter name="processfile">config/adeb/processes.txt</parameter>
+
+			<parameter name="ssl">true</parameter>
+			<parameter name="user_alias">user3</parameter>
+			<parameter name="keystore_file">config/adeb/user3.jks</parameter>
+			<parameter name="passphrase">wasnav</parameter>
+
+		</chsession>
+
+		<chsession name="tcp_s">
+		
+			<parameter name="user_alias">user3</parameter>
+			<parameter name="keystore_file">config/adeb/user3.jks</parameter>
+			<parameter name="passphrase">wasnav</parameter>
 		</chsession>
 	</channel>
 </appia>

@@ -4,6 +4,7 @@
 <appia>
 	<template name="ecco_t">
 		<session name="tcp_s" sharing="global">
+			
 			<protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol> 
 			
 			<!-- <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol> --> 
@@ -14,21 +15,19 @@
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
-			<parameter name="rank">1</parameter>
-			
-			
+			<parameter name="rank">4</parameter>
 			<parameter name="processfile">config/aebssl/processes.txt</parameter>
-			
 			<parameter name="ssl">true</parameter>
-			<parameter name="user_alias">user2</parameter>
-			<parameter name="keystore_file">config/aebssl/user1.jks</parameter>
+			<parameter name="user_alias">user5</parameter>
+			<parameter name="keystore_file">config/aebssl/user5.jks</parameter>
 			<parameter name="passphrase">wasnav</parameter>
+
 		</chsession>
 
 		<chsession name="tcp_s">
-		
-			<parameter name="user_alias">user2</parameter>
-			<parameter name="keystore_file">config/aebssl/user1.jks</parameter>
+
+			<parameter name="user_alias">user5</parameter>
+			<parameter name="keystore_file">config/aebssl/user5.jks</parameter>
 			<parameter name="passphrase">wasnav</parameter>
 		</chsession>
 

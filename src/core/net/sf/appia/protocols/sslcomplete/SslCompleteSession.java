@@ -166,12 +166,16 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
       handleSslRegisterSocket((SslRegisterSocketEvent)e);
     else if(e instanceof RegisterSocketEvent)
         handleRegisterSocket((RegisterSocketEvent) e);
-    else
+    else{
+        System.out.println("[SSL] Unknown event " +  e.getClass().getName());
       super.handle(e);
-  }
+    }
+    }
   
   private void handleSendable(SendableEvent e){
     Object[] valids=null;
+    
+    System.out.println("[SSL] RECEIVED START "+ e.getClass().getName());
     
     if(log.isDebugEnabled())
         log.debug("Preparing to send event "+e);
@@ -179,6 +183,13 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
     if (e.dest instanceof AppiaMulticast) {
       final Object[] dests=((AppiaMulticast)e.dest).getDestinations();
       for (int i=0 ; i < dests.length ; i++) {
+          try {
+            Thread.sleep(100);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        //  System.out.println("[SSL] EVENT DEST APPIAMULTICAST "+ e.getClass().getName());
         if (dests[i] instanceof InetSocketAddress) {
           if (!validate((InetSocketAddress)dests[i], e.getChannel())) {
             if (valids == null) {
@@ -195,6 +206,7 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
           sendUndelivered(e.getChannel(),(InetSocketAddress) dests[i]);
       }
     } else if (e.dest instanceof InetSocketAddress) {
+        System.out.println("[SSL] EVENT DEST INETSOCK "+ e.getClass().getName());
       if (!validate((InetSocketAddress)e.dest, e.getChannel()))
         sendUndelivered(e.getChannel(), (InetSocketAddress) e.dest);
     } else {
@@ -216,7 +228,11 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
       e.dest = new AppiaMulticast(((AppiaMulticast)e.dest).getMulticastAddress(), trimmedDests);
     }
     
+    System.out.println("[SSL] RECEIVED END BEFORE TCP"+ e.getClass().getName());
+    
     super.handle(e);
+    
+    System.out.println("[SSL] RECEIVED END AFTER TCP "+ e.getClass().getName());
   }
   
   private boolean validate(InetSocketAddress dest, Channel channel) {

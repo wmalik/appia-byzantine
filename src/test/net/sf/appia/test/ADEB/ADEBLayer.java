@@ -30,6 +30,7 @@ import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
+import net.sf.appia.protocols.sslcomplete.SslRegisterSocketEvent;
 
 
 /**
@@ -49,12 +50,14 @@ public class ADEBLayer extends Layer {
 		evRequire = new Class[]{
 		        ChannelInit.class,
 		        RegisterSocketEvent.class,
+		        SslRegisterSocketEvent.class,
 		        SendEvent.class,
 		};
         
 		
 		evProvide = new Class[] {
           RegisterSocketEvent.class, 
+          SslRegisterSocketEvent.class,
           SendEvent.class,
           EchoEvent.class,
           ReadyEvent.class,
@@ -64,6 +67,7 @@ public class ADEBLayer extends Layer {
                 ChannelInit.class,
                 ChannelClose.class,
                 RegisterSocketEvent.class,
+                SslRegisterSocketEvent.class,
                 BroadcastEvent.class,
                 SendEvent.class,
                 EchoEvent.class,

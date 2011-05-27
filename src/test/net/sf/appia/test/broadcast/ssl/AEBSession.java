@@ -126,14 +126,12 @@ public class AEBSession extends Session implements InitializableSession {
         }
 
         //Initialize the parameters for the algorithm
-
         sentecho = false;
         delivered = false;
-        //processes = new ArrayList<InetSocketAddress>();
+
 
 
         this.rank = Integer.parseInt(params.getProperty("rank"));
-        //remoteHost = params.getProperty("remotehost");
       
             /*ProcessSet Stuff*/
             this.processfile = params.getProperty("processfile");
@@ -347,7 +345,7 @@ public class AEBSession extends Session implements InitializableSession {
             Message message = ev.getMessage();
             ev.setBroadcastMessage(message.popString());
             final long now = time.currentTimeMillis();
-            System.out.print("\n[SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
+            System.out.print("\n process_" + this.rank+" [SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
 
         }
 

@@ -23,14 +23,13 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.ADEB;
+package net.sf.appia.test.broadcast.ssl;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.protocols.sslcomplete.SslRegisterSocketEvent;
 
 
 /**
@@ -39,39 +38,41 @@ import net.sf.appia.protocols.sslcomplete.SslRegisterSocketEvent;
  * @author Jose Mocito
  * @version 1.0
  */
-public class ADEBLayer extends Layer {
+public class ByzantineLayer extends Layer {
 
     /**
      * Creates a new EccoLayer.
      */
-	public ADEBLayer() {
+	public ByzantineLayer() {
 		
-	    
+	    /* Comments by Wasif
+	     * specifies which guarantees/messages are required from the lower layers
+	     * 
+	     */
 		evRequire = new Class[]{
 		        ChannelInit.class,
 		        RegisterSocketEvent.class,
-		        SslRegisterSocketEvent.class,
-		        SendEvent.class,
 		};
         
+		/* Comments by Wasif
+         * specifies which guarantees/messages are sent from this layer
+         * 
+         */
 		
 		evProvide = new Class[] {
           RegisterSocketEvent.class, 
-          SslRegisterSocketEvent.class,
           SendEvent.class,
-          EchoEvent.class,
-          ReadyEvent.class,
+          EchoEvent.class,//so that application is bind to a socket
+          //usually this class is required for only the top most layer
         };
 		
 		evAccept = new Class[]{
                 ChannelInit.class,
                 ChannelClose.class,
                 RegisterSocketEvent.class,
-                SslRegisterSocketEvent.class,
                 BroadcastEvent.class,
                 SendEvent.class,
                 EchoEvent.class,
-                ReadyEvent.class,
         };
 	}
 	
@@ -80,6 +81,6 @@ public class ADEBLayer extends Layer {
 	 * @see Layer#createSession()
 	 */
 	public Session createSession() {
-		return new ADEBSession(this);
+		return new ByzantineSession(this);
 	}
 }

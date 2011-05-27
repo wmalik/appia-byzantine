@@ -4,9 +4,9 @@
 <appia>
 	<template name="ecco_t">
 		<session name="tcp_s" sharing="global">
-		<!-- <protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol> -->
+		<protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol> 
 			
-			 <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol> 
+			 <!-- <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol> --> 
 		</session>
 		
 		<session name="ecco_s" sharing="private">
@@ -22,23 +22,23 @@
 			<parameter name="rank">2</parameter>
 
 			<parameter name="processfile">config/aebssl/processes.txt</parameter>
-
 			<parameter name="drop_send">false</parameter>
 			<parameter name="drop_echo">false</parameter>
 			<parameter name="modify_messageAtSource">0</parameter>
 			<parameter name="modify_messageInBetween">0</parameter>
-		
-			<parameter name="ssl">false</parameter>
-			<parameter name="user_alias">user1</parameter>
-			<parameter name="keystore_file">config/aebssl/user3.jks</parameter>
+	
+			<parameter name="ssl">true</parameter>
+			<parameter name="user_alias">user3</parameter>
+			<parameter name="keystore_file">config/aebssl/user1.jks</parameter>
+
 			<parameter name="passphrase">wasnav</parameter>
 
 		</chsession>
 
 		<chsession name="tcp_s">
 		
-			<parameter name="user_alias">user1</parameter>
-			<parameter name="keystore_file">config/aebssl/user3.jks</parameter>
+			<parameter name="user_alias">user3</parameter>
+			<parameter name="keystore_file">config/aebssl/user1.jks</parameter>
 			<parameter name="passphrase">wasnav</parameter>
 		</chsession>
 	</channel>

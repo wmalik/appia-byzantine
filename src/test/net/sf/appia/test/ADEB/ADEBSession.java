@@ -25,6 +25,8 @@
  */
 package net.sf.appia.test.ADEB;
 
+import irdp.protocols.tutorialDA.utils.ProcessSet;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -37,11 +39,13 @@ import net.sf.appia.core.Direction;
 import net.sf.appia.core.Event;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.TimeProvider;
+import net.sf.appia.core.events.AppiaMulticast;
 import net.sf.appia.core.events.SendableEvent;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.core.message.Message;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
+import net.sf.appia.protocols.sslcomplete.SslRegisterSocketEvent;
 import net.sf.appia.xml.interfaces.InitializableSession;
 import net.sf.appia.xml.utils.SessionProperties;
 
@@ -57,12 +61,7 @@ public class ADEBSession extends Session implements InitializableSession {
     private Channel channel;
     private TimeProvider time;
 
-    private InetSocketAddress local;
-    private int localPort = -1;
-    private ArrayList<InetSocketAddress> processes; 
-    private String remoteHost;
     private MyShell shell;
-
 
 
     private boolean sentecho;
@@ -77,6 +76,16 @@ public class ADEBSession extends Session implements InitializableSession {
     private int N;
     private final static int f = 1;
     private int sender_rank;
+    
+    /* SSL */
+    private boolean ssl=false;
+    private String user_alias=null;
+    private String keystoreFile=null;
+    private String keystorePass=null;
+    
+    /*For ProcessSet*/
+    ProcessSet processSet;
+    String processfile="";
 
 
     /**
@@ -90,71 +99,50 @@ public class ADEBSession extends Session implements InitializableSession {
     /**
      * Initializes the session using the parameters given in the XML configuration.
      * Possible parameters:
-     * <ul>
-     * <li><b>localport</b> the local port to bind.
-     * <li><b>remotehost</b> the remote host (IP address).
-     * <li><b>remoteport</b> the remote port.
-     * </ul>
      * 
      * @param params The parameters given in the XML configuration.
      */
     public void init(SessionProperties params) {
 
-        //Initialise the parameters for the algorithm
-
+        /*SSL stuff*/
+        this.ssl=params.getProperty("ssl").equals("true") ? true : false;
+        if(this.ssl)
+        {
+            System.out.println("SSL Mode");
+        this.user_alias=params.getProperty("user_alias");
+        this.keystoreFile=params.getProperty("keystore_file");
+        this.keystorePass=params.getProperty("passphrase");
+        }
+        else 
+        {
+            System.out.println("TCP Mode");
+        }
+        
+        
+        //Initialize the parameters for the algorithm
         sentecho = false;
         delivered = false;
-        processes = new ArrayList<InetSocketAddress>();
-
-        ///////////////////////////////////////
-
 
         this.rank = Integer.parseInt(params.getProperty("rank"));
-        this.localPort = Integer.parseInt(params.getProperty("localport"));
-        remoteHost = params.getProperty("remotehost");
-        final int remotePort1 = Integer.parseInt(params.getProperty("remoteport1"));
-        final int remotePort2 = Integer.parseInt(params.getProperty("remoteport2"));
-        final int remotePort3 = Integer.parseInt(params.getProperty("remoteport3"));
+        
+        
+        /*ProcessSet Stuff*/
+        this.processfile = params.getProperty("processfile");
+        this.processSet = ProcessSet.buildProcessSet(processfile,rank);
 
 
-        try {
-            InetSocketAddress remote1 = 	new InetSocketAddress(InetAddress.getByName(remoteHost),remotePort1);
-            InetSocketAddress remote2 =   new InetSocketAddress(InetAddress.getByName(remoteHost),remotePort2);
-            InetSocketAddress remote3 =   new InetSocketAddress(InetAddress.getByName(remoteHost),remotePort3);
-
-
-            /*added for the for loop*/
-            this.processes.add(remote1);
-            this.processes.add(remote2);
-            this.processes.add(remote3);
-
-            N = this.processes.size() + 1;
+            N = this.processSet.getSize();
 
             echos = new ArrayList<String>(N);
-            for(int i=0;i<this.processes.size()+1;i++)
+            for(int i=0;i<N;i++)
                 echos.add(BOTTOM);
             
             readys = new ArrayList<String>(N);
-            for(int i=0;i<this.processes.size()+1;i++)
+            for(int i=0;i<N;i++)
                 readys.add(BOTTOM);
 
-            
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace(); //
-        }
     }
 
-    /**
-     * Initialization method to be used directly by a static 
-     * initialization process
-     * @param localPort the local por
-     * @param remote the remote address
-     */
-    public void init(int localPort, InetSocketAddress remote){
-        //this.localPort = localPort;
-        //this.remote = remote;
-    }
 
     /**
      * Main event handler.
@@ -210,8 +198,9 @@ public class ADEBSession extends Session implements InitializableSession {
             String msg = checkMajority_f(readys);
             if(msg!=null && sentready == false) {
                 sentready = true;
-                broadcastReady(msg, "[READY2]");
+                multicastReadyEvent(msg, "[READY2]");
             }
+           
             
             
             String msg2 = checkMajority_2f(readys);
@@ -220,7 +209,7 @@ public class ADEBSession extends Session implements InitializableSession {
                 Deliver(msg2, this.sender_rank);
 
             }
-
+           
 
         }
         
@@ -290,20 +279,20 @@ public class ADEBSession extends Session implements InitializableSession {
                 System.out.println("Echo collected from process_"+msg_rank + ": "+recvd_msg);
             }
 
-            String msg = checkMajority(echos);
+            String msg = checkMajority_Nf2(echos);
 
             if(msg!=null && sentready == false) {
                 sentready = true;
-                broadcastReady(msg, "[READY]");
+                multicastReadyEvent(msg, "[READY]");
             }
+           
 
         }
 
     }
 
 
-    private void broadcastReady(String recvd_msg, String debug_msg) {
-        for(int i=0;i < processes.size(); i++) {
+    private void multicastReadyEvent(String recvd_msg, String debug_msg) {
 
             ReadyEvent re = new ReadyEvent();
             re.getMessage().pushString(recvd_msg);
@@ -312,90 +301,50 @@ public class ADEBSession extends Session implements InitializableSession {
             re.setDir(Direction.DOWN);
             re.setSourceSession(this);
             re.setChannel(channel);
-            re.source = local;
-            re.dest = processes.get(i);
+            re.dest = new AppiaMulticast(null,processSet.getAllSockets());
 
             try {
                 
                 re.init();
                 re.go();
-                System.out.println(debug_msg + " Sent to process_"+i);
+                System.out.println(debug_msg + " Multicasting");
                 
             } catch (AppiaEventException e) {
                 e.printStackTrace();
             }            
 
-        }
     }
 
     private void Deliver(String msg, int s_rank) {
 
         System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ s_rank);
-        /*
-        try {
 
-            SendableEvent sE = new SendableEvent(channel,Direction.UP,this);
-            //TODO: push sender and message to the SendableEvent
-            sE.setSession(INSERTSESSIONHERE);
-            sE.init();
-            sE.go();
-            
-
-        } catch (AppiaEventException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-*/
     }
-
 
     /***/
-    private String checkMajority(ArrayList<String> myEcho) {
-
+    private String checkMajority_Nf2(ArrayList<String> readys) {
 
         int msgCount = 0;
-        int correctCount = 0;
-
-        ArrayList<String> correctEchos = new ArrayList<String>(myEcho.size());
-
-        for(int i=0;i<myEcho.size();i++) {
-            if (!echos.get(i).equals(BOTTOM)) {
-                msgCount++;
-                correctEchos.add(myEcho.get(i));
+        for(int i=0;i<readys.size();i++) {
+            String current = readys.get(i);
+            if (current == BOTTOM) {
+                continue;
             }
-        }
-        String msg1 = null;
-        
-        if(correctEchos.size() > 1) {
-
-            for(int i=0;i<correctEchos.size();i++){
-                correctCount = 0;
-                msg1 = correctEchos.get(i);
-
-                for(int j=0;j<correctEchos.size();j++) {
-                    String msg2 = correctEchos.get(j);
-                    if(!msg1.equals(msg2)) {
-                        System.out.println("ECHOS not same - BYZANTINE DETECTED");
-                    }
-                    else {
-                        correctCount++;
+            else {
+                for(int j=0;j<readys.size();j++) {
+                    if (current.equals(readys.get(j))) {
+                        msgCount++;
                     }
                 }
-                
-                if(checkIfValid(correctCount))
-                    break;
+                if (msgCount > (N+f)/2) {
+                    return current; //this is the message
+                }
             }
-            
-            if(checkIfValid(correctCount))
-                return msg1 ;
-            else
-                return null;
         }
-        else 
-            return null; //this will be either 0 or 1
-
+        
+        return null; //means msgCount is not greater than f
     }
+
 
     private boolean checkIfValid(int correctCount) {
        if (correctCount > (N + f)/2)
@@ -409,9 +358,6 @@ public class ADEBSession extends Session implements InitializableSession {
         if (ev.getDir() == Direction.UP && sentecho == false){  // REmember to check if p=s(actually authentication layer should do this)
             sentecho = true;
             this.sender_rank = ev.getMessage().popInt();
-           // ev.getMessage().pushInt(sender_rank);
-
-            for(int i=0;i < processes.size(); i++) {
 
                 EchoEvent ee = new EchoEvent();
                 final Message messageSend = ee.getMessage();
@@ -419,13 +365,10 @@ public class ADEBSession extends Session implements InitializableSession {
                 ev.getMessage().pushString(myString);
                 messageSend.pushString(myString);
                 ee.getMessage().pushInt(this.rank);
-                ee.source = local;
-                ee.dest = processes.get(i);
-
-
+                ee.dest = new AppiaMulticast(null,processSet.getAllSockets());
 
                 try {
-                    System.out.println("[echo]Sending to process_"+i);
+                    //System.out.println("[EchoEvents] Multicasting");
                     ee.setSourceSession(this);
                     ee.setChannel(channel);
                     ee.setDir(Direction.DOWN);
@@ -435,25 +378,8 @@ public class ADEBSession extends Session implements InitializableSession {
                     e.printStackTrace();
                 }            
 
-            }     
-
-
-            //Testing purpose, Remove later
-            Message message = ev.getMessage();
-            ev.setBroadcastMessage(message.popString());
-            final long now = time.currentTimeMillis();
-            System.out.print("\n[SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
-            /////////////////////////////////////////
-
-
-
         }
 
-        // Testing Purpose, Remove later
-        /*  else if (ev.getDir() == Direction.UP && sentecho == true){
-            System.out.print("\n[SEND EVENT]: WILL NOT DELIVER MESSAGE!! ");
-        }*/
-        //////////////////////////////////////////////
     }
 
     /*
@@ -473,15 +399,29 @@ public class ADEBSession extends Session implements InitializableSession {
          * This event is used to register a socket on the layer that is used 
          * to interface Appia with sockets.
          */
+        //SslRegisterSocketEvent rse;
+        RegisterSocketEvent rse;
         try {
-            RegisterSocketEvent rse = new RegisterSocketEvent(channel,Direction.DOWN,this,localPort);
+            /*added for ProcessSet*/
+            InetSocketAddress selflocal = (InetSocketAddress) processSet.getSelfProcess().getSocketAddress();
+            if(this.ssl) 
+            {
+                System.out.println("Creating SSL socket on port:"+selflocal.getPort() + " file:" + keystoreFile);
+                System.out.println("Multiple sockets required?");
+                rse=new SslRegisterSocketEvent(channel,Direction.DOWN,this,selflocal.getPort(), keystoreFile,keystorePass.toCharArray());
+            }
+            else
+                rse = new RegisterSocketEvent(channel,Direction.DOWN,this,selflocal.getPort());   
+
             try {
-                rse.localHost = InetAddress.getByName(remoteHost);
+                /*Added for ProcessSet*/
+                rse.localHost = InetAddress.getByName(selflocal.getAddress().getHostAddress()); //this lets us use 127.0.0.1
             } catch (UnknownHostException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             rse.go();
+   
+            
         } catch (AppiaEventException e1) {
             e1.printStackTrace();
         }
@@ -496,9 +436,6 @@ public class ADEBSession extends Session implements InitializableSession {
             System.exit(-1);
         }
 
-        local = new InetSocketAddress(event.localHost,event.port);
-        this.processes.add(0, local); //adding ourself to the processes list.
-
         shell = new MyShell(channel);
         final Thread t = event.getChannel().getThreadFactory().newThread(shell);
         t.setName("Ecco shell");
@@ -512,102 +449,37 @@ public class ADEBSession extends Session implements InitializableSession {
         final Message message = ev.getMessage();
 
         if (ev.getDir() == Direction.DOWN) {
-            // Event is going DOWN
-
-            //send to ourself
-            /*
-            SendEvent se_self = new SendEvent();
-            final Message messageSend_self = se_self.getMessage();
-            messageSend_self.pushString(echo.getText());
-            se_self.source = local;
-            se_self.dest = local;
-            try {
-                System.out.println("Sending to ourself");
-                se_self.setSourceSession(this);
-                se_self.setChannel(channel);
-                se_self.setDir(Direction.DOWN);
-                se_self.init();
-                se_self.go();
-            } catch (AppiaEventException e) {
-                e.printStackTrace();
-            }            
-             */
-
-
-            for(int i=0;i < processes.size(); i++) {
-
-                SendEvent se = new SendEvent();
-                final Message messageSend = se.getMessage();
-                messageSend.pushString(ev.getText());
-                messageSend.pushInt(this.rank); //pushing the initiators rank
-                se.source = local;
-                se.dest = processes.get(i);
-                try {
-                    System.out.println("Sending to process_"+i); //asldkj
-                    se.setSourceSession(this);
-                    se.setChannel(channel);
-                    se.setDir(Direction.DOWN);
-                    se.init();
-                    se.go();
-                } catch (AppiaEventException e) {
-                    e.printStackTrace();
-                }            
-
-            }		    
-
-
-            /*SendEvent se = new SendEvent();
-            final Message messageSend = se.getMessage();
-            messageSend.pushString(echo.getText());
-            se.source = local;
-            se.dest = remote1;
-            try {
-        if (ev.getDir() == Direction.UP && sentecho == false){           System.out.println("Sending to remote1");
-                se.setSourceSession(this);
-                se.setChannel(channel);
-                se.setDir(Direction.DOWN);
-                se.init();
-                se.go();
-            } catch (AppiaEventException e) {
-                e.printStackTrace();
-            }
-
-
-
-            //sending to remote2 - cloning
-             SendEvent se2;
-            try {
-                se2 = (SendEvent)se.cloneEvent();
-                se2.getMessage().pushString(echo.getText());
-
-
-                se2.source = local;
-                se2.dest = remote2;
-
-                try {
-                    System.out.println("Sending to remote2");
-                    se2.setSourceSession(this);
-                    se2.setChannel(channel);
-                    se2.setDir(Direction.DOWN);
-                    se2.init();
-                    se2.go();
-                } catch (AppiaEventException e) {
-                    e.printStackTrace();
-                }
-            } catch (CloneNotSupportedException e1) {
-                e1.printStackTrace();
-            }
-             */
-
-
+            
+            multicastSendEvent(ev.getText(), "[SEND]");
+           
         }
-        else {
-            // Event is going UP
-            ev.setText(message.popString()); //try commenting this line and see if this still works
-            final long now = time.currentTimeMillis();
-            System.out.print("\n[BROACAST WEIRD] On ["+new Date(now)+"] : "+ev.getText()+"\n> ");
-        }
+//        else {
+//            // Event is going UP
+//            ev.setText(message.popString()); //try commenting this line and see if this still works
+//            final long now = time.currentTimeMillis();
+//            System.out.print("\n[BROACAST WEIRD] On ["+new Date(now)+"] : "+ev.getText()+"\n> ");
+//        }
     }
+    
+
+    private void multicastSendEvent(String recvd_msg, String debug_msg) {
+
+        SendEvent se = new SendEvent();
+        final Message messageSend = se.getMessage();
+        messageSend.pushString(recvd_msg);
+        messageSend.pushInt(this.rank); //pushing the initiators rank
+        se.dest = new AppiaMulticast(null,processSet.getAllSockets());
+        try {
+            se.setSourceSession(this);
+            se.setChannel(channel);
+            se.setDir(Direction.DOWN);
+            se.init();
+            se.go();
+        } catch (AppiaEventException e) {
+            e.printStackTrace();
+        } 
+    }
+    
 
     /*
      * ChannelClose

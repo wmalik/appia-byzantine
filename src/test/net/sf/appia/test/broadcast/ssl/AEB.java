@@ -27,21 +27,7 @@ package net.sf.appia.test.broadcast.ssl;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-
 import net.sf.appia.core.Appia;
-import net.sf.appia.core.AppiaCursorException;
-import net.sf.appia.core.AppiaDuplicatedSessionsException;
-import net.sf.appia.core.AppiaInvalidQoSException;
-import net.sf.appia.core.Channel;
-import net.sf.appia.core.ChannelCursor;
-import net.sf.appia.core.Layer;
-import net.sf.appia.core.QoS;
-import net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer;
-import net.sf.appia.test.xml.ecco.EccoLayer;
-import net.sf.appia.test.xml.ecco.EccoSession;
 import net.sf.appia.xml.AppiaXML;
 
 import org.xml.sax.SAXException;
@@ -53,30 +39,22 @@ import org.xml.sax.SAXException;
  */
 public class AEB {
 
-    private static final int NUMBER_OF_ARGS = 3;
 
     private AEB() {}
 
-    private static Layer[] qos={
-        new net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer(),
-        new EccoLayer(),
-    };
 
     public static void main(String[] args) {
 
         /*
-         * Example:    java AEB 1.xml processsfile.txt 2
+         * Example:    java AEB 1.xml
          * 
          * */
         		if (args.length == 1) {
         			final File xmlfile = new File(args[0]);
-        			//String processfile = args[1];
-        			//int selfrank = Integer.valueOf(args[2]);
         			
         			try {
         				AppiaXML.load(xmlfile);
         				Appia.run();
-        				//AppiaXML.loadAndRun(xmlfile);
         			} catch (SAXException e) {
         				e.printStackTrace();
         			} catch (IOException e) {
@@ -84,81 +62,10 @@ public class AEB {
         			}
         		}
 
-//        if (args.length > 1) {
-//
-//            final File xmlfile = new File(args[0]);
-//            String processfile = args[1];
-//            int selfrank = Integer.valueOf(args[2]);
-//            
-//            TcpCompleteSession tcpsession = new TcpCompleteLayer();
-//            AEBLayer aebsession = new AEBLayer();
-//            
-//            aebsession.init();
-//
-//
-//        }
 
-        //		
-        //		else if (args.length == NUMBER_OF_ARGS) {
-        //			final int localport = Integer.parseInt(args[0]);
-        //			final String remotehost = args[1];
-        //			final int remoteport = Integer.parseInt(args[2]);
-        //			
-        //			/* Create a QoS */
-        //		    QoS myQoS=null;
-        //		    try {
-        //		      myQoS=new QoS("Appl QoS",qos);
-        //		    } catch(AppiaInvalidQoSException ex) {
-        //		      System.err.println("Invalid QoS");
-        //		      System.err.println(ex.getMessage());
-        //		      System.exit(1);
-        //		    }
-        //		    
-        //		    /* Create a channel. Uses default event scheduler. */
-        //		    final Channel myChannel=myQoS.createUnboundChannel("Appl Channel");
-        //		    
-        //		    /* Application Session requires special arguments: qos and port.
-        //		       A session is created and binded to the stack. Remaining ones
-        //		       are created by default
-        //		     */
-        //		    
-        //		    final EccoSession es=(EccoSession)qos[qos.length-1].createSession();
-        //		    try {
-        //				es.init(
-        //						localport,
-        //						new InetSocketAddress(InetAddress.getByName(remotehost),remoteport));
-        //			} catch (UnknownHostException e) {
-        //				e.printStackTrace();
-        //			}
-        //		    
-        //		    final ChannelCursor cc=myChannel.getCursor();
-        //		    /* Application is the last session of the array. Positioning
-        //		       in it is simple */
-        //		    try {
-        //		      cc.top();
-        //		      cc.setSession(es);
-        //		    } catch(AppiaCursorException ex) {
-        //		      System.err.println("Unexpected exception in main. Type code:"+
-        //		      ex.type);
-        //		      System.exit(1);
-        //		    }
-        //		    
-        //		    /* Remaining ones are created by default. Just tell the channel to start */
-        //		    try {
-        //		    	myChannel.start();
-        //		    } catch(AppiaDuplicatedSessionsException ex) {
-        //		    	System.err.println("Sessions binding strangely resulted in "+
-        //		    			"one single sessions occurring more than "+
-        //						"once in a channel");
-        //		    	System.exit(1);
-        //		    }
-        //		    Appia.run();
-        //		}
         else {
             System.out.println("Invalid number of arguments!");
-            System.out.println(
-            "Usage:\tjava Ecco <localport> <remotehost> <remoteport>");
-            System.out.println("\tjava Ecco <xml_file>");
+            System.out.println("\tjava AEB <xml_file>");
         }
     }
 }

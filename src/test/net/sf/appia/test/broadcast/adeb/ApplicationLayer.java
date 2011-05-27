@@ -27,18 +27,13 @@ package net.sf.appia.test.broadcast.adeb;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
-import net.sf.appia.core.events.channel.ChannelClose;
-import net.sf.appia.core.events.channel.ChannelInit;
-import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.test.broadcast.adeb.BroadcastEvent;
-import net.sf.appia.test.broadcast.adeb.EchoEvent;
-import net.sf.appia.test.broadcast.adeb.SendEvent;
+
 
 
 /**
- * This class defines a EccoLayer
+ * This class defines an Application Layer
  * 
- * @author Jose Mocito
+ * @author EMDC
  * @version 1.0
  */
 public class ApplicationLayer extends Layer {
@@ -67,6 +62,7 @@ public class ApplicationLayer extends Layer {
 		
 		evAccept = new Class[]{
            DeliverEvent.class,
+           
         };
 	}
 	

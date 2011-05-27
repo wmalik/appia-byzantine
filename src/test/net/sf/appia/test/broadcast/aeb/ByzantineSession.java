@@ -23,7 +23,7 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast.byzantine;
+package net.sf.appia.test.broadcast.aeb;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -44,9 +44,9 @@ import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.core.message.Message;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.test.broadcast.adeb.EchoEvent;
-import net.sf.appia.test.broadcast.adeb.MyShell;
-import net.sf.appia.test.broadcast.adeb.SendEvent;
+import net.sf.appia.test.broadcast.aeb.EchoEvent;
+import net.sf.appia.test.broadcast.aeb.MyShell;
+import net.sf.appia.test.broadcast.aeb.SendEvent;
 import net.sf.appia.xml.interfaces.InitializableSession;
 import net.sf.appia.xml.utils.SessionProperties;
 
@@ -126,11 +126,11 @@ public class ByzantineSession extends Session implements InitializableSession {
      */
     public void handle(Event ev) {
         if (ev instanceof SendEvent){
-            System.out.println("BYZANTINE LAYER: SEND EVENT");
+           // System.out.println("BYZANTINE LAYER: SEND EVENT");
             handleSendEvent((SendEvent) ev);
         }
         else if (ev instanceof EchoEvent){
-            System.out.println("BYZANTINE LAYER: ECHO EVENT");
+           // System.out.println("BYZANTINE LAYER: ECHO EVENT");
             handleEchoEvent((EchoEvent) ev);
         }
         else{

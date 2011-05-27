@@ -23,16 +23,16 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast.byzantine;
+package net.sf.appia.test.broadcast.aeb;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelClose;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.test.broadcast.adeb.BroadcastEvent;
-import net.sf.appia.test.broadcast.adeb.EchoEvent;
-import net.sf.appia.test.broadcast.adeb.SendEvent;
+import net.sf.appia.test.broadcast.aeb.BroadcastEvent;
+import net.sf.appia.test.broadcast.aeb.EchoEvent;
+import net.sf.appia.test.broadcast.aeb.SendEvent;
 
 
 /**

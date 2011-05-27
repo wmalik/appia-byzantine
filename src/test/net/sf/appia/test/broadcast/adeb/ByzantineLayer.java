@@ -23,7 +23,7 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast.byzantine;
+package net.sf.appia.test.broadcast.adeb;
 
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
@@ -65,7 +65,8 @@ public class ByzantineLayer extends Layer {
 		evProvide = new Class[] {
           RegisterSocketEvent.class, 
           SendEvent.class,
-          EchoEvent.class,//so that application is bind to a socket
+          EchoEvent.class,
+          ReadyEvent.class,//so that application is bind to a socket
           //usually this class is required for only the top most layer
         };
 		
@@ -76,6 +77,7 @@ public class ByzantineLayer extends Layer {
                 BroadcastEvent.class,
                 SendEvent.class,
                 EchoEvent.class,
+                ReadyEvent.class,
         };
 	}
 	

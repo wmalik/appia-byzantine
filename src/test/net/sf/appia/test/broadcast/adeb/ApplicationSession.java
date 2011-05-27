@@ -59,23 +59,6 @@ import net.sf.appia.xml.utils.SessionProperties;
  */
 public class ApplicationSession extends Session implements InitializableSession {
 
-    private Channel channel;
-    private TimeProvider time;
-
-    private InetSocketAddress local;
-    private int localPort = -1;
-    private ArrayList<InetSocketAddress> processes; 
-
-    private MyShell shell;
-
-
-    private boolean drop_send = false;
-    private boolean drop_echo = false;
-    private Integer modify_messageAtSource;
-    private Integer modify_messageInBetween;
-    private boolean go = true;
-
-
     /**
      * Creates a new EccoSession.
      * @param l
@@ -118,14 +101,12 @@ public class ApplicationSession extends Session implements InitializableSession 
      * @see net.sf.appia.core.Session#handle(net.sf.appia.core.Event)
      */
     public void handle(Event ev) {
-        System.out.println("[APPLICATION LAYER] CALLED");
         if (ev instanceof DeliverEvent){
-            System.out.println("[APPLICATION LAYER] DELIVER EVENT");
             handleDeliverEvent((DeliverEvent) ev);
         }
         else{
             try {
-                if(ev.getDir() == Direction.UP)
+                if(ev.getDir() == Direction.DOWN)
                     System.out.println("[APPLICATION LAYER] "+ ev.getClass().getName());
                 ev.go();
             } catch (AppiaEventException e) {

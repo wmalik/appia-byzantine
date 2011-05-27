@@ -14,7 +14,7 @@
 		</session>
 
 		<session name="ecco_s" sharing="private">
-			<protocol>net.sf.appia.test.broadcast.byzantine.ByzantineLayer</protocol>
+			<protocol>net.sf.appia.test.broadcast.aeb.ByzantineLayer</protocol>
 		</session>
 
 

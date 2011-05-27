@@ -23,7 +23,7 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package net.sf.appia.test.broadcast.byzantine;
+package net.sf.appia.test.broadcast.adeb;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -47,6 +47,7 @@ import net.sf.appia.protocols.common.RegisterSocketEvent;
 import net.sf.appia.test.broadcast.adeb.EchoEvent;
 import net.sf.appia.test.broadcast.adeb.MyShell;
 import net.sf.appia.test.broadcast.adeb.SendEvent;
+import net.sf.appia.test.broadcast.adeb.ReadyEvent;
 import net.sf.appia.xml.interfaces.InitializableSession;
 import net.sf.appia.xml.utils.SessionProperties;
 
@@ -71,8 +72,10 @@ public class ByzantineSession extends Session implements InitializableSession {
 
     private boolean drop_send = false;
     private boolean drop_echo = false;
+    private boolean drop_ready = false;
     private Integer modify_messageAtSource;
     private Integer modify_messageInBetween;
+    private Integer modify_messageReady;
     private boolean go = true;
 
 
@@ -99,12 +102,16 @@ public class ByzantineSession extends Session implements InitializableSession {
 
         this.drop_send = Boolean.parseBoolean(params.getProperty("drop_send"));
         this.drop_echo = Boolean.parseBoolean(params.getProperty("drop_echo"));
+        this.drop_ready = Boolean.parseBoolean(params.getProperty("drop_ready"));
         this.modify_messageAtSource = Integer.parseInt(params.getProperty("modify_messageAtSource"));
         this.modify_messageInBetween = Integer.parseInt(params.getProperty("modify_messageInBetween"));
+        this.modify_messageReady = Integer.parseInt(params.getProperty("modify_messageReady"));
         System.out.println("[INIT BYZANTINE], DROP_SEND: "+ this.drop_send);
         System.out.println("[INIT BYZANTINE], DROP_ECHO: "+ this.drop_echo);
+        System.out.println("[INIT BYZANTINE], DROP_READY: "+ this.drop_ready);
         System.out.println("[INIT BYZANTINE], MODIFY_MESSAGE SOURCE: "+ this.modify_messageAtSource);
         System.out.println("[INIT BYZANTINE], MODIFY_MESSAGE IN BETWEEN: "+ this.modify_messageInBetween);
+        System.out.println("[INIT BYZANTINE], MODIFY_MESSAGE READY: "+ this.modify_messageReady);
     }
 
     /**
@@ -126,11 +133,17 @@ public class ByzantineSession extends Session implements InitializableSession {
      */
     public void handle(Event ev) {
         if (ev instanceof SendEvent){
-            System.out.println("BYZANTINE LAYER: SEND EVENT");
+           // System.out.println("BYZANTINE LAYER: SEND EVENT");
             handleSendEvent((SendEvent) ev);
         }
+        
+        else if (ev instanceof ReadyEvent){
+            // System.out.println("BYZANTINE LAYER: SEND EVENT");
+             handleReadyEvent((ReadyEvent) ev);
+         }
+        
         else if (ev instanceof EchoEvent){
-            System.out.println("BYZANTINE LAYER: ECHO EVENT");
+           // System.out.println("BYZANTINE LAYER: ECHO EVENT");
             handleEchoEvent((EchoEvent) ev);
         }
         else{
@@ -139,6 +152,75 @@ public class ByzantineSession extends Session implements InitializableSession {
                     System.out.println("BYZANTINE LAYER: "+ ev.getClass().getName());
                 ev.go();
             } catch (AppiaEventException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void handleReadyEvent(ReadyEvent ev) {
+        // TODO Auto-generated method stub
+        if (ev.getDir() == Direction.DOWN && ev.dest instanceof AppiaMulticast){
+            Object[] dests = ((AppiaMulticast)ev.dest).getDestinations();
+            int sender_rank = ev.getMessage().popInt();
+            int rank_recvd =ev.getMessage().popInt();
+            String msg_recvd = ev.getMessage().popString();
+            for( int i =0; i< dests.length; i++  ){
+
+                ReadyEvent re = new ReadyEvent();
+                final Message messageSend = re.getMessage();
+                messageSend.pushString(msg_recvd);
+                messageSend.pushInt(rank_recvd);
+                messageSend.pushInt(sender_rank);
+                re.source = local;
+                re.dest = (InetSocketAddress) dests[i];
+                try {
+                  //  System.out.println("Sending to process_"+i);
+                    re.setSourceSession(ev.getSourceSession());
+                    re.setChannel(ev.getChannel());
+                    re.setDir(Direction.DOWN);
+                    re.init();
+                } catch (AppiaEventException e) {
+                    e.printStackTrace();
+                }            
+
+
+                if(modify_messageReady >0 && ev.getDir() == Direction.DOWN){
+                    Integer sender = re.getMessage().popInt();
+                    Integer rank = re.getMessage().popInt();
+                    String msg = re.getMessage().popString();
+                    Random r = new Random();
+                    msg = Long.toString(Math.abs(r.nextLong()), 36);
+                    System.out.println("Modified String is: " +msg);
+                    re.setBroadcastMessage(msg);
+                    re.getMessage().pushString(msg);
+                    re.getMessage().pushInt(rank);
+                    re.getMessage().pushInt(sender);
+                    modify_messageReady --;
+                }
+
+                if(this.drop_ready && ev.getDir() == Direction.DOWN)
+                {
+                    System.out.println("[BYZANTINE] Dropping message of type Readyevent");
+                    this.go = false;
+                }
+
+                if(this.go) {
+                    try {
+                        re.go();
+                    } catch (AppiaEventException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                this.go = true;
+            }
+        }
+        else
+        {
+            try {
+                ev.go();
+            } catch (AppiaEventException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

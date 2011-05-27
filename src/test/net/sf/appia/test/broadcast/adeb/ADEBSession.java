@@ -48,7 +48,7 @@ import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.core.message.Message;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
 import net.sf.appia.protocols.sslcomplete.SslRegisterSocketEvent;
-import net.sf.appia.test.broadcast.aeb.DeliverEvent;
+import net.sf.appia.test.broadcast.adeb.DeliverEvent;
 import net.sf.appia.xml.interfaces.InitializableSession;
 import net.sf.appia.xml.utils.SessionProperties;
 
@@ -307,7 +307,6 @@ public class ADEBSession extends Session implements InitializableSession {
 
     private void Deliver(String msg, int s_rank) {
 
-        System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ (Integer)senderMessageMap.get(msg));
         DeliverEvent de = new DeliverEvent();
         final Message messageSend = de.getMessage();
         messageSend.pushString(msg);

@@ -14,7 +14,7 @@
 		</session>
 
 		<session name="ecco_s" sharing="private">
-			<protocol>net.sf.appia.test.broadcast.byzantine.ByzantineLayer</protocol>
+			<protocol>net.sf.appia.test.broadcast.adeb.ByzantineLayer</protocol>
 		</session>
 
 
@@ -35,8 +35,10 @@
 			<!-- Byzantine properties -->
 			<parameter name="drop_send">false</parameter>
 			<parameter name="drop_echo">false</parameter>
+			<parameter name="drop_ready">false</parameter>
 			<parameter name="modify_messageAtSource">0</parameter>
 			<parameter name="modify_messageInBetween">0</parameter>
+			<parameter name="modify_messageReady">0</parameter>
 
 		</chsession>
 

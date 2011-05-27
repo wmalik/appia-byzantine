@@ -51,7 +51,8 @@ import net.sf.appia.xml.utils.SessionProperties;
 
 
 /**
- * This class defines a ADEBSession.
+ * Authenticated Double Echo Broadcast (algorithm 3.18)
+ * This class defines a ADEBSession
  * 
  * @author EMDC
  * @version 1.0
@@ -410,15 +411,12 @@ public class ADEBSession extends Session implements InitializableSession {
     }
 
     /*
-     * EchoEvent
+     * handle BroadCastEvent
      */
     private void handleBroadcastEvent(BroadcastEvent ev) {
-        final Message message = ev.getMessage();
 
         if (ev.getDir() == Direction.DOWN) {
-
             multicastSendEvent(ev.getText(), "[SEND]");
-
         }
 
     }

@@ -41,8 +41,8 @@
 			<parameter name="store_type">JKS</parameter>
 			<parameter name="keystore_file">config/adeb/cert/user2.jks</parameter>
 			<parameter name="keystore_pass">123456</parameter>
-			<parameter name="trustedcerts_file">config/adeb/cert/usercerts.jks</parameter>
-			<parameter name="trustedcerts_pass">123456</parameter>
+			<parameter name="public_keys_file">config/adeb/cert/usercerts.jks</parameter>
+			<parameter name="public_keys_pass">123456</parameter>
 		</chsession>
 
 

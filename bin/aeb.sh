@@ -8,4 +8,5 @@ done
 echo "Classpath: $CP";
 
 
-java -cp $CP net.sf.appia.test.broadcast.AEB $@
+#java -Djava.protocol.handler.pkgs=com.sun.net.ssl.internal.www.protocol -Djavax.net.debug=ssl -cp $CP net.sf.appia.test.broadcast.ssl.AEB $@
+java -cp $CP net.sf.appia.test.broadcast.aeb.AEB $@

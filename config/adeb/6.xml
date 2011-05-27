@@ -19,15 +19,13 @@
 
 
 		<session name="ecco_s" sharing="private">
-			<protocol>net.sf.appia.test.broadcast.aeb.AEBLayer</protocol>
+			<protocol>net.sf.appia.test.broadcast.adeb.ADEBLayer</protocol>
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
-			<parameter name="rank">2</parameter>
-
-			<parameter name="processfile">config/aeb/processes.txt</parameter>
-			
+			<parameter name="rank">5</parameter>
+			<parameter name="processfile">config/adeb/processes.txt</parameter>
 
 			<!-- Byzantine properties -->
 			<parameter name="drop_send">false</parameter>
@@ -35,18 +33,15 @@
 			<parameter name="modify_messageAtSource">0</parameter>
 			<parameter name="modify_messageInBetween">0</parameter>
 
-
 		</chsession>
 
 		<chsession name="sign_s">
-			<parameter name="user_alias">user3</parameter>
+			<parameter name="user_alias">user6</parameter>
 			<parameter name="store_type">JKS</parameter>
-			<parameter name="keystore_file">config/aeb/cert/user3.jks</parameter>
+			<parameter name="keystore_file">config/adeb/cert/user6.jks</parameter>
 			<parameter name="keystore_pass">123456</parameter>
-			<parameter name="trustedcerts_file">config/aeb/cert/usercerts.jks</parameter>
+			<parameter name="trustedcerts_file">config/adeb/cert/usercerts.jks</parameter>
 			<parameter name="trustedcerts_pass">123456</parameter>
 		</chsession>
-
-
 	</channel>
 </appia>

@@ -4,20 +4,50 @@
 <appia>
 	<template name="ecco_t">
 		<session name="tcp_s" sharing="global">
+
 			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
+
 		</session>
+
+		<session name="sign_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.signature.SignatureLayer</protocol>
+		</session>
+
 		<session name="ecco_s" sharing="private">
-			<protocol>net.sf.appia.test.broadcast2.AEBLayer</protocol>
+			<protocol>net.sf.appia.test.broadcast.byzantine.ByzantineLayer</protocol>
+		</session>
+
+
+		<session name="ecco_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.aeb.AEBLayer</protocol>
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
-		<parameter name="rank">3</parameter>
-			<parameter name="localport">55555</parameter>
-			<parameter name="remotehost">127.0.0.1</parameter>
-			<parameter name="remoteport1">22222</parameter>
-			<parameter name="remoteport2">33333</parameter>
-			<parameter name="remoteport3">44444</parameter>
+			<parameter name="rank">3</parameter>
+			
+			<!-- Byzantine properties -->
+			<parameter name="drop_send">false</parameter>
+			<parameter name="drop_echo">false</parameter>
+			<parameter name="modify_messageAtSource">0</parameter>
+			<parameter name="modify_messageInBetween">0</parameter>
+			
+
+			<parameter name="processfile">config/aeb/processes.txt</parameter>
+
+
 		</chsession>
+
+		<chsession name="sign_s">
+			<parameter name="user_alias">user4</parameter>
+			<parameter name="store_type">JKS</parameter>
+			<parameter name="keystore_file">config/aeb/cert/user4.jks</parameter>
+			<parameter name="keystore_pass">123456</parameter>
+			<parameter name="trustedcerts_file">config/aeb/cert/usercerts.jks</parameter>
+			<parameter name="trustedcerts_pass">123456</parameter>
+		</chsession>
+
+
+
 	</channel>
 </appia>

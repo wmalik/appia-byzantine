@@ -37,6 +37,8 @@ import java.util.Date;
 
 import javax.net.ssl.SSLSocket;
 
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
 import net.sf.appia.core.Direction;
@@ -61,13 +63,18 @@ import net.sf.appia.xml.utils.SessionProperties;
  * @author Jose Mocito
  * @version 1.0
  */
+
+
+
 public class AEBSession extends Session implements InitializableSession {
 
+ 
     private Channel channel;
     private TimeProvider time;
 
     private MyShell shell;
 
+    Hashtable senderMessageMap; 
 
     private boolean sentecho;
     private boolean delivered;
@@ -103,7 +110,8 @@ public class AEBSession extends Session implements InitializableSession {
         sentecho = false;
         delivered = false;
 
-
+        /*for sender*/
+        senderMessageMap = new Hashtable();
 
         this.rank = Integer.parseInt(params.getProperty("rank"));
       
@@ -187,12 +195,15 @@ public class AEBSession extends Session implements InitializableSession {
 
             Message message = ev.getMessage();
 
+            sender_rank = message.popInt();
             int rank = message.popInt();
             String recvd_msg = message.popString();
 
-
+            senderMessageMap.put(recvd_msg, sender_rank);
+            
             if(echos.get(rank).equals(BOTTOM))
             {
+                
                 echos.set(rank, recvd_msg);
                 System.out.println("Echo collected from process_"+rank + ": "+recvd_msg);
             }
@@ -201,7 +212,7 @@ public class AEBSession extends Session implements InitializableSession {
 
             if(msg!=null && delivered == false) {
                 delivered = true;
-                Deliver(msg, sender_rank);
+                Deliver(msg);
 
             }
 
@@ -212,10 +223,23 @@ public class AEBSession extends Session implements InitializableSession {
     }
 
 
-    private void Deliver(String msg, int sender_rank) {
+    private void Deliver(String msg) {
+           
+        DeliverEvent de = new DeliverEvent();
+        final Message messageSend = de.getMessage();
+        messageSend.pushString(msg);
+        de.getMessage().pushInt(this.rank);
+        de.getMessage().pushInt((Integer)senderMessageMap.get(msg));
 
-        System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ sender_rank);
-
+        try {
+            de.setSourceSession(this);
+            de.setChannel(channel);
+            de.setDir(Direction.UP);
+            de.init();
+            de.go();
+        } catch (AppiaEventException e) {
+            e.printStackTrace();
+        }            
     }
 
 
@@ -280,7 +304,7 @@ public class AEBSession extends Session implements InitializableSession {
             String signature = ev.getMessage().popString();
             String alias = ev.getMessage().popString();
             
-            System.out.println("SENDEVENT - signature:"+ signature + " alias:"+alias);
+           // System.out.println("SENDEVENT - signature:"+ signature + " alias:"+alias);
             
             sentecho = true;
             sender_rank = ev.getMessage().popInt();
@@ -291,6 +315,7 @@ public class AEBSession extends Session implements InitializableSession {
                 ev.getMessage().pushString(myString);
                 messageSend.pushString(myString);
                 ee.getMessage().pushInt(this.rank);
+                ee.getMessage().pushInt(sender_rank);
                 ee.dest = new AppiaMulticast(null,processSet.getAllSockets());
 
 
@@ -305,15 +330,11 @@ public class AEBSession extends Session implements InitializableSession {
                 } catch (AppiaEventException e) {
                     e.printStackTrace();
                 }            
-
-            //}     
-
-//YEAH!
-            //Testing purpose, Remove later
-//            Message message = ev.getMessage();
-//            ev.setBroadcastMessage(message.popString());
-//            final long now = time.currentTimeMillis();
-//            System.out.print("\n process_" + this.rank+" [SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
+           
+            Message message = ev.getMessage();
+            ev.setBroadcastMessage(message.popString());
+            final long now = time.currentTimeMillis();
+            System.out.print("\n process_" + this.rank+" [SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
 
         }
 

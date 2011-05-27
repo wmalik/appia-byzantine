@@ -33,6 +33,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
 import net.sf.appia.core.Direction;
@@ -46,6 +48,7 @@ import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.core.message.Message;
 import net.sf.appia.protocols.common.RegisterSocketEvent;
 import net.sf.appia.protocols.sslcomplete.SslRegisterSocketEvent;
+import net.sf.appia.test.broadcast.aeb.DeliverEvent;
 import net.sf.appia.xml.interfaces.InitializableSession;
 import net.sf.appia.xml.utils.SessionProperties;
 
@@ -63,6 +66,8 @@ public class ADEBSession extends Session implements InitializableSession {
     private TimeProvider time;
 
     private MyShell shell;
+
+    Hashtable senderMessageMap; 
 
 
     private boolean sentecho;
@@ -105,6 +110,9 @@ public class ADEBSession extends Session implements InitializableSession {
 
         this.rank = Integer.parseInt(params.getProperty("rank"));
 
+        /*for sender*/
+        senderMessageMap = new Hashtable();
+        
         /*ProcessSet Stuff*/
         this.processfile = params.getProperty("processfile");
         this.processSet = ProcessSet.buildProcessSet(processfile,rank);
@@ -162,8 +170,11 @@ public class ADEBSession extends Session implements InitializableSession {
 
             Message message = ev.getMessage();
 
+            sender_rank = message.popInt();
             int msg_rank = message.popInt();
             String recvd_msg = message.popString();
+            
+            senderMessageMap.put(recvd_msg, sender_rank);
 
             //do stuff here
             System.out.println("[READY_RECEIVED] Source:"+msg_rank + 
@@ -247,9 +258,11 @@ public class ADEBSession extends Session implements InitializableSession {
 
             Message message = ev.getMessage();
 
+            sender_rank = message.popInt();
             int msg_rank = message.popInt();
             String recvd_msg = message.popString();
 
+            senderMessageMap.put(recvd_msg, sender_rank);
 
             if(echos.get(msg_rank).equals(BOTTOM))
             {
@@ -274,6 +287,7 @@ public class ADEBSession extends Session implements InitializableSession {
         ReadyEvent re = new ReadyEvent();
         re.getMessage().pushString(recvd_msg);
         re.getMessage().pushInt(this.rank);
+        re.getMessage().pushInt((Integer)senderMessageMap.get(recvd_msg));
 
         re.setDir(Direction.DOWN);
         re.setSourceSession(this);
@@ -294,8 +308,22 @@ public class ADEBSession extends Session implements InitializableSession {
 
     private void Deliver(String msg, int s_rank) {
 
-        System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ s_rank);
+        System.out.println("DELIVERED: \""+ msg + "\" SENDER: "+ (Integer)senderMessageMap.get(msg));
+        DeliverEvent de = new DeliverEvent();
+        final Message messageSend = de.getMessage();
+        messageSend.pushString(msg);
+        de.getMessage().pushInt(this.rank);
+        de.getMessage().pushInt((Integer)senderMessageMap.get(msg));
 
+        try {
+            de.setSourceSession(this);
+            de.setChannel(channel);
+            de.setDir(Direction.UP);
+            de.init();
+            de.go();
+        } catch (AppiaEventException e) {
+            e.printStackTrace();
+        }            
     }
 
     /***/
@@ -340,6 +368,7 @@ public class ADEBSession extends Session implements InitializableSession {
             ev.getMessage().pushString(myString);
             messageSend.pushString(myString);
             ee.getMessage().pushInt(this.rank);
+            ee.getMessage().pushInt(sender_rank);
             ee.dest = new AppiaMulticast(null,processSet.getAllSockets());
 
             try {

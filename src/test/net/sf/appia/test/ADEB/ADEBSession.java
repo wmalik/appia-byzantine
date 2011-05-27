@@ -89,7 +89,7 @@ public class ADEBSession extends Session implements InitializableSession {
 
 
     /**
-     * Creates a new EccoSession.
+     * Creates a new ADEBSession.
      * @param l
      */
     public ADEBSession(ADEBLayer l) {
@@ -178,7 +178,9 @@ public class ADEBSession extends Session implements InitializableSession {
         
         if (ev.getDir() == Direction.UP){
 
-
+            String signature = ev.getMessage().popString();
+            String alias = ev.getMessage().popString();
+            
             Message message = ev.getMessage();
 
             int msg_rank = message.popInt();
@@ -266,7 +268,9 @@ public class ADEBSession extends Session implements InitializableSession {
     private void handleEchoEvent(EchoEvent ev) {
         if (ev.getDir() == Direction.UP){
 
-
+            String signature = ev.getMessage().popString();
+            String alias = ev.getMessage().popString();
+            
             Message message = ev.getMessage();
 
             int msg_rank = message.popInt();
@@ -279,6 +283,7 @@ public class ADEBSession extends Session implements InitializableSession {
                 System.out.println("Echo collected from process_"+msg_rank + ": "+recvd_msg);
             }
 
+            
             String msg = checkMajority_Nf2(echos);
 
             if(msg!=null && sentready == false) {
@@ -322,21 +327,23 @@ public class ADEBSession extends Session implements InitializableSession {
     }
 
     /***/
-    private String checkMajority_Nf2(ArrayList<String> readys) {
+    private String checkMajority_Nf2(ArrayList<String> echos) {
 
-        int msgCount = 0;
-        for(int i=0;i<readys.size();i++) {
-            String current = readys.get(i);
+        
+        for(int i=0;i<echos.size();i++) {
+            int msgCount = 0;
+            String current = echos.get(i);
             if (current == BOTTOM) {
                 continue;
             }
             else {
-                for(int j=0;j<readys.size();j++) {
-                    if (current.equals(readys.get(j))) {
+                for(int j=0;j<echos.size();j++) {
+                    if (current.equals(echos.get(j))) {
                         msgCount++;
                     }
                 }
                 if (msgCount > (N+f)/2) {
+//                    System.out.println("majority echos collected:"+msgCount+" for message:"+current);
                     return current; //this is the message
                 }
             }
@@ -356,6 +363,10 @@ public class ADEBSession extends Session implements InitializableSession {
 
     private void handleSendEvent(SendEvent ev) {
         if (ev.getDir() == Direction.UP && sentecho == false){  // REmember to check if p=s(actually authentication layer should do this)
+            
+            String signature = ev.getMessage().popString();
+            String alias = ev.getMessage().popString();
+            
             sentecho = true;
             this.sender_rank = ev.getMessage().popInt();
 

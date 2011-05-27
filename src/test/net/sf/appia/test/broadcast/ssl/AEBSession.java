@@ -88,6 +88,13 @@ public class AEBSession extends Session implements InitializableSession {
     private String user_alias=null;
     private String keystoreFile=null;
     private String keystorePass=null;
+    private String protocol = "SSL";
+    private String certificate_managers = "SunX509";
+    private String keystore = "JKS";
+    private String enabled_ciphers = "DHE-RSA-AES256-SHA,DHE-DSS-AES256-SHA,AES256-SHA,EDH-RSA-DES-CBC3-SHA,EDH-DSS-DES-CBC3-SHA,DES-CBC3-SHA,DES-CBC3-MD5,DHE-RSA-AES128-SHA,DHE-DSS-AES128-SHA,AES128-SHA,RC2-CBC-MD5,RC4-SHA,RC4-MD5,RC4-MD5,EDH-RSA-DES-CBC-SHA,EDH-DSS-DES-CBC-SHA,DES-CBC-SHA,DES-CBC-MD5,EXP-EDH-RSA-DES-CBC-SHA,EXP-EDH-DSS-DES-CBC-SHA,EXP-DES-CBC-SHA,EXP-RC2-CBC-MD5,EXP-RC2-CBC-MD5,EXP-RC4-MD5,EXP-RC4-MD5";
+    
+
+    
     
     /*For ProcessSet*/
     ProcessSet processSet;
@@ -108,9 +115,6 @@ public class AEBSession extends Session implements InitializableSession {
      */
     public void init(SessionProperties params) {
 
-        
-       
-        
         /*SSL stuff*/
         this.ssl=params.getProperty("ssl").equals("true") ? true : false;
         if(this.ssl)
@@ -203,24 +207,13 @@ public class AEBSession extends Session implements InitializableSession {
     }
 
     
-    /**
-     * Gets the process set and forwards the event to other layers.
-     * 
-     * @param event
-     */
-    /*
-    private void handleProcessInitEvent(ProcessInitEvent event) {
-      processSet = event.getProcessSet();
-      try {
-        event.go();
-      } catch (AppiaEventException e) {
-        e.printStackTrace();
-      }
-    }*/
+  
     
     private void handleEchoEvent(EchoEvent ev) {
         if (ev.getDir() == Direction.UP){
-
+            
+            String signature = ev.getMessage().popString();
+            String alias = ev.getMessage().popString();
 
             Message message = ev.getMessage();
 
@@ -313,11 +306,14 @@ public class AEBSession extends Session implements InitializableSession {
 
     private void handleSendEvent(SendEvent ev) {
         if (ev.getDir() == Direction.UP && sentecho == false){  // REmember to check if p=s(actually authentication layer should do this)
+          
+            String signature = ev.getMessage().popString();
+            String alias = ev.getMessage().popString();
+            
             sentecho = true;
             sender_rank = ev.getMessage().popInt();
 
-
-                EchoEvent ee = new EchoEvent();
+             EchoEvent ee = new EchoEvent();
                 final Message messageSend = ee.getMessage();
                 String myString = ev.getMessage().popString();
                 ev.getMessage().pushString(myString);
@@ -340,12 +336,12 @@ public class AEBSession extends Session implements InitializableSession {
 
             //}     
 
-
+//YEAH!
             //Testing purpose, Remove later
-            Message message = ev.getMessage();
-            ev.setBroadcastMessage(message.popString());
-            final long now = time.currentTimeMillis();
-            System.out.print("\n process_" + this.rank+" [SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
+//            Message message = ev.getMessage();
+//            ev.setBroadcastMessage(message.popString());
+//            final long now = time.currentTimeMillis();
+//            System.out.print("\n process_" + this.rank+" [SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
 
         }
 
@@ -377,7 +373,6 @@ public class AEBSession extends Session implements InitializableSession {
             if(this.ssl) 
             {
                 System.out.println("Creating SSL socket on port:"+selflocal.getPort() + " file:" + keystoreFile);
-                System.out.println("Multiple sockets required?");
                 rse=new SslRegisterSocketEvent(channel,Direction.DOWN,this,selflocal.getPort(), keystoreFile,keystorePass.toCharArray());
             }
             else

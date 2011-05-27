@@ -109,7 +109,7 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
    * @param layer
    */
   public SslCompleteSession(Layer layer) {
-    super(layer);
+    super(layer); 
   }
 
   /**
@@ -183,12 +183,12 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
     if (e.dest instanceof AppiaMulticast) {
       final Object[] dests=((AppiaMulticast)e.dest).getDestinations();
       for (int i=0 ; i < dests.length ; i++) {
-          try {
-            Thread.sleep(100);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+//          try {
+//           // Thread.sleep(100);
+//        } catch (InterruptedException e1) {
+//            // TODO Auto-generated catch block
+//            e1.printStackTrace();
+//        }
         //  System.out.println("[SSL] EVENT DEST APPIAMULTICAST "+ e.getClass().getName());
         if (dests[i] instanceof InetSocketAddress) {
           if (!validate((InetSocketAddress)dests[i], e.getChannel())) {
@@ -249,7 +249,7 @@ public class SslCompleteSession extends TcpCompleteSession implements Initializa
         if(existsSocket(otherReaders,dest)){
           if(log.isDebugEnabled())
               log.debug("recognized other ssl socket. sending...");
-          return true;
+          return true;//
         }
         else{//if not
           //create new socket and put it opensockets created by us

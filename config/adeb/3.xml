@@ -4,32 +4,55 @@
 <appia>
 	<template name="ecco_t">
 		<session name="tcp_s" sharing="global">
-		 <protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol> 
-		<!--	
-			 <protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
-			 --> 
+			<!--
+				<protocol>net.sf.appia.protocols.sslcomplete.SslCompleteLayer</protocol>
+			-->
+
+
+			<protocol>net.sf.appia.protocols.tcpcomplete.TcpCompleteLayer</protocol>
+
 		</session>
-				<session name="ecco_s" sharing="private">
+
+		<session name="sign_s" sharing="private">
+			<protocol>net.sf.appia.test.broadcast.ssl.SignatureLayer</protocol>
+		</session>
+
+		<session name="ecco_s" sharing="private">
 			<protocol>net.sf.appia.test.ADEB.ADEBLayer</protocol>
 		</session>
 	</template>
 	<channel name="ecco_c" template="ecco_t" initialized="yes">
 		<chsession name="ecco_s">
 			<parameter name="rank">2</parameter>
-			
+
 			<parameter name="processfile">config/adeb/processes.txt</parameter>
 
-			<parameter name="ssl">true</parameter>
+
+			<parameter name="ssl">false</parameter>
 			<parameter name="user_alias">user3</parameter>
-			<parameter name="keystore_file">config/adeb/user3.jks</parameter>
+			<parameter name="keystore_file">config/adeb/user1.jks</parameter>
 			<parameter name="passphrase">wasnav</parameter>
 
 		</chsession>
 
-		<chsession name="tcp_s">
-		
+		<chsession name="sign_s">
 			<parameter name="user_alias">user3</parameter>
-			<parameter name="keystore_file">config/adeb/user3.jks</parameter>
+			<parameter name="store_type">JKS</parameter>
+			<parameter name="keystore_file">config/adeb/cert/user3.jks</parameter>
+			<parameter name="keystore_pass">123456</parameter>
+			<parameter name="trustedcerts_file">config/adeb/cert/usercerts.jks</parameter>
+			<parameter name="trustedcerts_pass">123456</parameter>
+		</chsession>
+
+
+		<chsession name="tcp_s">
+			<parameter name="protocol">SSL</parameter>
+			<parameter name="certificate_managers">SunX509</parameter>
+			<parameter name="keystore">JKS</parameter>
+			<parameter name="enabled_ciphers">DHE-RSA-AES256-SHA,DHE-DSS-AES256-SHA,AES256-SHA,EDH-RSA-DES-CBC3-SHA,EDH-DSS-DES-CBC3-SHA,DES-CBC3-SHA,DES-CBC3-MD5,DHE-RSA-AES128-SHA,DHE-DSS-AES128-SHA,AES128-SHA,RC2-CBC-MD5,RC4-SHA,RC4-MD5,RC4-MD5,EDH-RSA-DES-CBC-SHA,EDH-DSS-DES-CBC-SHA,DES-CBC-SHA,DES-CBC-MD5,EXP-EDH-RSA-DES-CBC-SHA,EXP-EDH-DSS-DES-CBC-SHA,EXP-DES-CBC-SHA,EXP-RC2-CBC-MD5,EXP-RC2-CBC-MD5,EXP-RC4-MD5,EXP-RC4-MD5</parameter>
+
+			<parameter name="user_alias">user3</parameter>
+			<parameter name="keystore_file">config/adeb/user1.jks</parameter>
 			<parameter name="passphrase">wasnav</parameter>
 		</chsession>
 	</channel>

@@ -25,12 +25,10 @@
  */
 package net.sf.appia.test.broadcast.adeb;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Random;
+
 
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
@@ -38,21 +36,15 @@ import net.sf.appia.core.Direction;
 import net.sf.appia.core.Event;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.TimeProvider;
-import net.sf.appia.core.events.AppiaMulticast;
-import net.sf.appia.core.events.SendableEvent;
-import net.sf.appia.core.events.channel.ChannelClose;
-import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.core.message.Message;
-import net.sf.appia.protocols.common.RegisterSocketEvent;
-import net.sf.appia.test.broadcast.adeb.EchoEvent;
+
 import net.sf.appia.test.broadcast.adeb.MyShell;
-import net.sf.appia.test.broadcast.adeb.SendEvent;
 import net.sf.appia.xml.interfaces.InitializableSession;
 import net.sf.appia.xml.utils.SessionProperties;
 
 
 /**
- * This class defines a EccoSession.
+ * This class defines a ApplicationSession.
  * 
  * @author Jose Mocito
  * @version 1.0
@@ -82,6 +74,8 @@ public class ApplicationSession extends Session implements InitializableSession 
      */
     public ApplicationSession(ApplicationLayer l) {
         super(l);
+        
+        System.out.println("APPLICATION CONSTRUCTOR");
     }
 
     /**
@@ -96,7 +90,7 @@ public class ApplicationSession extends Session implements InitializableSession 
      * @param params The parameters given in the XML configuration.
      */
     public void init(SessionProperties params) {
-
+        System.out.println("APPLICATION INIT");
      
     }
 
@@ -118,7 +112,7 @@ public class ApplicationSession extends Session implements InitializableSession 
      * @see net.sf.appia.core.Session#handle(net.sf.appia.core.Event)
      */
     public void handle(Event ev) {
-        System.out.println("[APPLICATION LAYER] CALLED");
+        System.out.println("[APPLICATION LAYER] HANDLE CALLED---------------------------------");
         if (ev instanceof DeliverEvent){
             System.out.println("[APPLICATION LAYER] DELIVER EVENT");
             handleDeliverEvent((DeliverEvent) ev);

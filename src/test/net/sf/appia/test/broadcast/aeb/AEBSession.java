@@ -331,11 +331,6 @@ public class AEBSession extends Session implements InitializableSession {
                     e.printStackTrace();
                 }            
            
-            Message message = ev.getMessage();
-            ev.setBroadcastMessage(message.popString());
-            final long now = time.currentTimeMillis();
-            System.out.print("\n process_" + this.rank+" [SEND EVENT] On ["+new Date(now)+"] : "+ev.getBroadcastMessage()+"\n> ");
-
         }
 
 
@@ -358,7 +353,7 @@ public class AEBSession extends Session implements InitializableSession {
          * This event is used to register a socket on the layer that is used 
          * to interface Appia with sockets.
          */
-        //SslRegisterSocketEvent rse;
+       
         RegisterSocketEvent rse;
         try {
             /*added for ProcessSet*/
@@ -415,9 +410,7 @@ public class AEBSession extends Session implements InitializableSession {
     }
 
     
-    /*
-     * EchoEvent
-     */
+    
     private void handleBroadcastEvent(BroadcastEvent ev) {
         final Message message = ev.getMessage();
 
@@ -441,12 +434,7 @@ public class AEBSession extends Session implements InitializableSession {
                 }            
 
         }
-        else {
-            // Event is going UP
-            ev.setText(message.popString()); //try commenting this line and see if this still works
-            final long now = time.currentTimeMillis();
-            System.out.print("\n[BROACAST WEIRD] On ["+new Date(now)+"] : "+ev.getText()+"\n> ");
-        }
+        
     }
 
     /*

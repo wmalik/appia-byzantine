@@ -32,8 +32,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;

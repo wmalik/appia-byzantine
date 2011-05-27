@@ -141,7 +141,7 @@ public class ApplicationSession extends Session implements InitializableSession 
             int rank = message.popInt();
             String recvd_msg = message.popString();
             
-            System.out.println("[Application Layer] DELIVERED: \""+ recvd_msg + "\" SENDER: "+ sender_rank);
+            System.out.println("[Application Layer_CHECK] DELIVERED: \""+ recvd_msg + "\" SENDER: "+ sender_rank);
         }
         
     }

@@ -66,8 +66,7 @@ public class AEBLayer extends Layer {
                 RegisterSocketEvent.class,
                 SslRegisterSocketEvent.class,
                 SendEvent.class,
-                EchoEvent.class,//so that application is bind to a socket
-                //usually this class is required for only the top most layer
+                EchoEvent.class,
         };
 
         evAccept = new Class[]{
